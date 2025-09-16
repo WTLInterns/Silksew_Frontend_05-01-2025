@@ -1,3 +1,4 @@
+
 /* Basic styling for the layout */
 body {
   font-family: Arial, sans-serif;
@@ -16,8 +17,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 240px;
-  background-color: #1c1c1c;
-  color: white;
+  background-color: #f4f4f9;
   padding-top: 20px;
   transition: transform 0.3s ease;
   position: absolute;
@@ -255,5 +255,6 @@ footer {
   width: 14px;
   height: 14px;
 }
+
 
 
