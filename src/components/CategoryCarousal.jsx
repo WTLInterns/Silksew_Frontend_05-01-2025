@@ -455,7 +455,7 @@ function CategoryCarousel() {
       } catch (err) {
         console.error("Error fetching offers:", err);
       } finally {
-        setLoading(false);s
+        setLoading(false);
       }
     };
     fetchOffers();
