@@ -34,6 +34,8 @@ import {
   faClock,
   faBars,
   faMedal ,
+  faListAlt,
+  faBell,
 } from "@fortawesome/free-solid-svg-icons"
 import AdminUser from "./AdminUser"
 import ShippedOrders from "./ConfirmedOrders"
@@ -410,8 +412,8 @@ const Dashboard = () => {
                 { key: "ConfirmedOrder", icon: faTruck, label: "Shipped Orders" },
                 { key: "Reviews", icon: faComments, label: "Reviews" },
                 { key: "OfferForm", icon: faTags, label: "Add Offers" },
-                { key: "update-remove-offer", icon: faTags, label: "Offers List" },
-                { key: "StockAlarm", icon: faTags, label: "Stock Alarm", notification: lowStockProducts.length },
+                { key: "update-remove-offer", icon: faListAlt, label: "Offers List" },
+                { key: "StockAlarm", icon: faBell, label: "Stock Alarm", notification: lowStockProducts.length },
                 { key: "Subscriptions", icon: faMedal, label: "Subscriptions" }
               ].map((item) => (
                 <div
