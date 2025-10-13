@@ -48,6 +48,7 @@ const ConditionalFloatingButtons = () => {
 
 const ConditionalFooter = () => {
   const location = useLocation()
+  // Removed "/cart" from excludeFooterRoutes so footer appears on cart page
   const excludeFooterRoutes = ["/admin", "/user-profile-buttons", "/your-order", "/profile"]
   return !excludeFooterRoutes.includes(location.pathname) ? <Footer /> : null
 }
@@ -58,69 +59,71 @@ function App() {
       <CategoryProvider>
         <BrowserRouter>
           <ConditionalNavbar />
-          <Routes>
-            <Route path="/" element={<Shop />} />
-            <Route path="/mens" element={<Mens />} />
-            <Route path="/womens" element={<Women />} />
-            <Route path="/kids" element={<Kids />} />
-            <Route path="/product" element={<Product />}>
-              <Route path=":productId" element={<Product />} />
-            </Route>
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<LoginSignup />} />
-            <Route path="/forgotPassword/:id/:token" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<PasswordReset />} />
-            <Route path="/filter" element={<FilterProduct />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-conditions" element={<TermsServices />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/profile" element={<UserProfileButtons />} />
+          <main>
+            <Routes>
+              <Route path="/" element={<Shop />} />
+              <Route path="/mens" element={<Mens />} />
+              <Route path="/womens" element={<Women />} />
+              <Route path="/kids" element={<Kids />} />
+              <Route path="/product" element={<Product />}>
+                <Route path=":productId" element={<Product />} />
+              </Route>
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<LoginSignup />} />
+              <Route path="/forgotPassword/:id/:token" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<PasswordReset />} />
+              <Route path="/filter" element={<FilterProduct />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-conditions" element={<TermsServices />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/profile" element={<UserProfileButtons />} />
 
-            {/* 🔒 Protected Routes */}
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute role="user">
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile/edit"
-              element={
-                <ProtectedRoute role="user">
-                  <UserProfileForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                <ProtectedRoute role="user">
-                  <YourOrder />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders/:orderId"
-              element={
-                <ProtectedRoute role="user">
-                  <OrderItems />
-                </ProtectedRoute>
-              }
-            />
+              {/* 🔒 Protected Routes */}
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute role="user">
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/edit"
+                element={
+                  <ProtectedRoute role="user">
+                    <UserProfileForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute role="user">
+                    <YourOrder />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders/:orderId"
+                element={
+                  <ProtectedRoute role="user">
+                    <OrderItems />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* 🔒 Admin-only route */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute role="admin">
-                  <AdminPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+              {/* 🔒 Admin-only route */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute role="admin">
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
           <ConditionalFloatingButtons />
           <ConditionalFooter />
           <ToastContainer position="top-right" autoClose={3000} />

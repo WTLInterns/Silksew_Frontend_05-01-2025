@@ -7,15 +7,7 @@
 	--footer-transition: 0.3s ease;
 }
 
-/* .footer {
-	background: var(--footer-bg);
-	color: var(--footer-text);
-	font-family: "Open Sans", sans-serif;
-	padding: 4rem 1rem 2rem;
-	width: 100%;
-	margin-top: 10px;
-  } */
-
+/* Ensure footer is always at the bottom */
 .footer {
   /* Glassy black gradient background */
   background: linear-gradient(
@@ -35,12 +27,11 @@
   font-family: "Open Sans", sans-serif;
   padding: 2rem 1rem 1.5rem; 
   width: 100%;
-  margin-top: 10px;
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.6);
-
+  margin-top: auto; /* Push footer to bottom */
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.6);
+  position: relative; /* Ensure proper positioning */
+  z-index: 10; /* Ensure footer is above other elements */
 }
-
-
 
 .footer-container {
 	display: flex;
