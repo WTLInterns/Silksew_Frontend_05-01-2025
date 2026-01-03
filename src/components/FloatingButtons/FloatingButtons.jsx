@@ -1,7 +1,7 @@
 
 import React from "react";
 import "./FloatingButtons.css"; // Import CSS
-import { FaWhatsapp, FaRobot } from "react-icons/fa"; // Import icons
+import { FaWhatsapp } from "react-icons/fa"; // Import icons
 
 const FloatingButtons = () => {
   return (
