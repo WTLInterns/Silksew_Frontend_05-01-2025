@@ -15,7 +15,7 @@ const Popular = () => {
     const fetchProducts = async () => {
       try {
         // ✅ Fetch only latest 4 products directly from backend
-        const response = await axios.get("http://localhost:5003/api/products/list?limit=4");
+        const response = await axios.get("https://api.silksew.com/api/products/list?limit=4");
         const fetchedProducts = Array.isArray(response.data)
           ? response.data
           : response.data.products;

@@ -1,2 +1,2 @@
-export const BASEURL="http://localhost:5003";
+export const BASEURL="https://api.silksew.com";
 

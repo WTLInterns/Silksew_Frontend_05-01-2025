@@ -105,9 +105,9 @@ const PrivacyPolicy = () => {
       <p style={styles.paragraph}>For questions regarding this policy, contact us:</p>
       <ul style={styles.list}>
         <li style={styles.listItem}><strong>Email:</strong> <a href="mailto:
-info@webutsav.com" style={styles.link}>
-          info@webutsav.com</a></li>
-        <li style={styles.listItem}><strong>Phone:</strong> +91 9325578091</li>
+silksew30@gmail.com" style={styles.link}>
+          silksew30@gmail.com</a></li>
+        <li style={styles.listItem}><strong>Phone:</strong> +91 9226108039 </li>
       </ul>
     </div>
   );

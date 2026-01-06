@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getConfig } from './config';
 
-// Favorites API base (axios.defaults.baseURL should be http://localhost:5003)
+// Favorites API base (axios.defaults.baseURL should be https://api.silksew.com)
 const API_URL = '/api/favorites';
 
 // Add product to favorites

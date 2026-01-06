@@ -1,4 +1,4 @@
-:root {
+/* :root {
     --border-color: #1a237e;
     --primary-color: #453966;
     --text-color: #333;
@@ -145,8 +145,7 @@
     }
   }
   
-  /* Responsive design */
-  @media (max-width: 768px) {
+   @media (max-width: 768px) {
     :root {
       --container-height: auto;
       --number-size: 1.25rem;
@@ -184,8 +183,7 @@
     }
   }
   
-  /* High-contrast mode support */
-  @media (prefers-contrast: high) {
+   @media (prefers-contrast: high) {
     :root {
       --border-color: #000;
       --primary-color: #000;
@@ -193,7 +191,6 @@
     }
   }
   
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .marquee-content {
       animation: none;
@@ -210,7 +207,6 @@
     }
   }
   
-  /* Print styles */
   @media print {
     .sale-wrapper {
       position: static;
@@ -236,6 +232,381 @@
 }
 
  .offer-date-range {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  display: inline-block;
+  margin: 8px 0;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+} */
+
+
+
+
+:root {
+  --border-color: #1a237e;
+  --primary-color: #453966;
+  --text-color: #333;
+  --background-color: #f2d972;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --border-width: 2px;
+  --container-height: 64px;
+  --number-size: 1.5rem;
+  --label-size: 1rem;
+  --sale-text-size: 1.2rem;
+}
+
+.sale-wrapper {
+  top: 0;
+  width: 100%;
+  position: relative;
+  background: linear-gradient(to right, #1f1c2c, #928dab);
+  overflow: hidden;
+  z-index: 990; /* Lower z-index to avoid overlapping with WhatsApp icon */
+}
+
+.sale-container {
+  display: flex;
+  width: 100%;
+  height: var(--container-height);
+  background: linear-gradient(to right, #1f1c2c, #928dab);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.timer-section {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-lg);
+  min-width: max-content;
+  border-right: var(--border-width) solid #fff;
+  gap: var(--spacing-lg);
+  height: 100%;
+}
+
+.sale-text {
+  font-size: var(--sale-text-size);
+  font-weight: 800;
+  color: #fb0404ee;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.blink {
+  animation: blink-animation 1s steps(5, start) infinite;
+  text-shadow: 1px 1px 2px #000;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+.countdown {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  height: 100%;
+}
+
+.time-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: var(--spacing-sm);
+  transition: transform 0.2s ease;
+}
+
+.code-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: var(--spacing-sm);
+  transition: transform 0.2s ease;
+}
+
+.time-unit:hover {
+  transform: translateY(-2px);
+}
+
+.number {
+  font-size: var(--number-size);
+  font-weight: 800;
+  color: #fff;
+  font-family: "JetBrains Mono", monospace;
+  line-height: 1.2;
+  display: block;
+}
+
+.label {
+  font-size: var(--label-size);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+.marquee-section {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm);
+  min-height: 40px;
+}
+
+.marquee-content {
+  display: flex;
+  position: absolute;
+  animation: marquee 50s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.marquee-item {
+  padding: 0 var(--spacing-md);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* MOBILE RESPONSIVE FIXES */
+@media (max-width: 768px) {
+  :root {
+    --container-height: auto;
+    --number-size: 1.25rem;
+    --label-size: 0.7rem;
+    --sale-text-size: 0.9rem;
+  }
+
+  .sale-wrapper {
+    position: relative;
+    z-index: 990; /* Lower z-index to avoid overlapping with WhatsApp icon */
+    margin-bottom: 60px; /* Add margin to avoid overlap with fixed WhatsApp icon */
+  }
+
+  .sale-container {
+    flex-direction: column;
+    min-height: auto;
+    height: auto;
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .timer-section {
+    border-right: none;
+    min-width: auto;
+    border-bottom: var(--border-width) solid #fff;
+    padding: 12px 8px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: 80px;
+    height: auto;
+    gap: 10px;
+  }
+
+  .countdown {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .time-unit {
+    min-width: auto;
+    padding: 4px 8px;
+  }
+
+  .marquee-section {
+    padding: 8px 0;
+    min-height: 35px;
+    height: 35px;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .sale-text {
+    font-size: 0.9rem;
+    white-space: normal;
+    text-align: center;
+    margin: 0 4px;
+    line-height: 1.3;
+  }
+
+  .number {
+    font-size: 1rem;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* Offer date range mobile fix */
+  .offer-date-range {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+    margin: 4px;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.2);
+    animation: pulse 2s infinite;
+    text-align: center;
+    max-width: 90%;
+    word-break: keep-all;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+}
+
+/* VERY SMALL MOBILE DEVICES (iPhone 5/SE, etc.) */
+@media (max-width: 320px) {
+  .timer-section {
+    padding: 8px 4px;
+    min-height: 70px;
+    gap: 6px;
+  }
+
+  .sale-text {
+    font-size: 0.75rem;
+  }
+
+  .number {
+    font-size: 0.85rem;
+  }
+
+  .offer-date-range {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+
+  .marquee-item {
+    font-size: 0.8rem;
+    padding: 0 6px;
+  }
+}
+
+/* FIX FOR WHATSAPP ICON OVERLAP */
+@media (max-width: 768px) {
+  /* Ensure sale timer doesn't overlap with fixed elements */
+  .sale-wrapper {
+    position: relative;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+
+  /* WhatsApp icon styles for mobile */
+  .whatsapp-icon,
+  .whatsapp-float,
+  .whatsapp-button {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+  }
+}
+
+/* TABLET DEVICES */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .timer-section {
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .sale-text {
+    font-size: 1.1rem;
+  }
+
+  .number {
+    font-size: 1.3rem;
+  }
+}
+
+/* High-contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000;
+    --primary-color: #000;
+    --text-color: #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-content {
+    animation: none;
+    position: static;
+    transform: none;
+  }
+
+  .time-unit:hover {
+    transform: none;
+  }
+
+  .blink {
+    animation: none;
+  }
+
+  .offer-date-range {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .sale-wrapper {
+    position: static;
+    width: 100%;
+    margin: 0;
+  }
+
+  .marquee-section {
+    display: none;
+  }
+
+  .blink {
+    animation: none;
+  }
+}
+
+.sale-wrapper,
+.sale-container,
+.timer-section,
+.marquee-section {
+  display: flex !important;
+}
+
+.offer-date-range {
   background-color: #fff3cd;
   color: #856404;
   padding: 6px 12px;

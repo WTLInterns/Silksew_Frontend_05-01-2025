@@ -45,7 +45,7 @@ const UserProfileButtons = () => {
         toast.error("No authentication token found. Please log in.")
         return
       }
-      const response = await axios.get("http://localhost:5003/api/userProfileDetail/user-profile", {
+      const response = await axios.get("https://api.silksew.com/api/userProfileDetail/user-profile", {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -68,7 +68,7 @@ const UserProfileButtons = () => {
         return
       }
       setLoadingProducts(true)
-      const response = await axios.get("http://localhost:5003/api/orders", {
+      const response = await axios.get("https://api.silksew.com/api/orders", {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -113,7 +113,7 @@ const UserProfileButtons = () => {
 
     try {
       const response = await axios.put(
-        "http://localhost:5003/api/updateUserProfileDetail/update-user-profile",
+        "https://api.silksew.com/api/updateUserProfileDetail/update-user-profile",
         userData,
         { headers: { Authorization: `Bearer ${token}` } }
       )

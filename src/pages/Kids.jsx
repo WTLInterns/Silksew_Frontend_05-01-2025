@@ -14,7 +14,7 @@ function Kids() {
     const fetchProducts = async () => {
       try {
         // Fetch products and filter only those in the 'Kids' category
-        const response = await axios.get("http://localhost:5003/api/products");
+        const response = await axios.get("https://api.silksew.com/api/products");
         const fetchedProducts = Array.isArray(response.data)
           ? response.data
           : response.data.products;

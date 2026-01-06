@@ -78,6 +78,7 @@ function App() {
               <Route path="/terms-conditions" element={<TermsServices />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/profile" element={<UserProfileButtons />} />
+              
 
               {/* 🔒 Protected Routes */}
               <Route

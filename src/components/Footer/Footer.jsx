@@ -63,8 +63,8 @@ const Footer = () => {
                 <i className="fas fa-phone-alt"></i>
               </div>
               <p className="footer-text">
-                <a href="tel:+919325578091" className="footer-link">
-                  +91 9325578091
+                <a href="tel:+919226108039 " className="footer-link">
+                  +91 9226108039 
                 </a>
               </p>
             </div>
@@ -74,7 +74,7 @@ const Footer = () => {
               </div>
               <p className="footer-text">
                 <a href="mailto:info@cobazTech.com" className="footer-link">
-                  info@webutsav.com
+                  silksew30@gmail.com
                 </a>
               </p>
             </div>
@@ -90,7 +90,7 @@ const Footer = () => {
           <div className="footer-socials-wrapper">
             <div className="footer-socials">
               <a
-                href="https://wa.me/9325578091"
+                href="https://wa.me/9226108039 "
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-social-link"

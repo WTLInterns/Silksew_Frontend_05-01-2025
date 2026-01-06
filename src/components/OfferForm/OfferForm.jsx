@@ -97,7 +97,7 @@ const OfferForm = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:5003/api/offer/create-offer",
+        "https://api.silksew.com/api/offer/create-offer",
         submitData,
         {
           headers: { "Content-Type": "application/json" }
