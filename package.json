@@ -30,7 +30,7 @@
     "react-multi-carousel": "^2.8.5",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.1",
-    "react-toastify": "^11.0.3",
+    "react-toastify": "^11.0.5",
     "recharts": "^2.15.0",
     "redux": "^5.0.1",
     "slick-carousel": "^1.8.1",
@@ -44,6 +44,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:5000",
   "eslintConfig": {
     "extends": [
       "react-app"

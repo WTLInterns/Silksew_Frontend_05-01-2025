@@ -11,7 +11,7 @@
 //   const fetchSubscribers = async () => {
 //     try {
 //       setLoading(true);
-//       const res = await fetch("https://api.silksew.com/api/list");
+//       const res = await fetch("http://localhost:5003/api/list");
 //       const data = await res.json();
 //       if (res.ok) setSubscribers(data);
 //       else alert(data.message || "Failed to fetch subscribers");
@@ -28,7 +28,7 @@
 //     if (!offer.trim()) return alert("Please enter an offer message");
 //     try {
 //       setLoading(true);
-//       const res = await fetch("https://api.silksew.com/api/send-offer", {
+//       const res = await fetch("http://localhost:5003/api/send-offer", {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
 //         body: JSON.stringify({ offer }),
@@ -500,7 +500,7 @@ export default function Subscription() {
   const fetchSubscribers = async () => {
     try {
       setLoading(true);
-      const res = await fetch("https://api.silksew.com/api/list");
+      const res = await fetch("http://localhost:5003/api/list");
       const data = await res.json();
       if (res.ok) setSubscribers(data);
       else alert(data.message || "Failed to fetch subscribers");
@@ -517,7 +517,7 @@ export default function Subscription() {
     if (!offer.trim()) return alert("Please enter an offer message");
     try {
       setLoading(true);
-      const res = await fetch("https://api.silksew.com/api/send-offer", {
+      const res = await fetch("http://localhost:5003/api/send-offer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ offer }),

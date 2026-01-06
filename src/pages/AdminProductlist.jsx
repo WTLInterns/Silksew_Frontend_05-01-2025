@@ -4,6 +4,7 @@
 import { useState, useEffect, useContext, useCallback, useMemo } from "react"
 import axios from "axios"
 import { AuthContext } from "../context/AuthContext"
+import { setupAxios } from "../services/config"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import "../pages/CSS/AdminProductlist.css"
@@ -95,6 +96,10 @@ function AdminProductlist({ updateTotalProducts, updateLowStockProducts }) {
 
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
+
+  useEffect(() => {
+    setupAxios()
+  }, [])
 
   const categories = ["women"]
 
@@ -347,8 +352,9 @@ function AdminProductlist({ updateTotalProducts, updateLowStockProducts }) {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await axios.get("https://api.silksew.com/api/products", {
-        headers: { Authorization: `Bearer ${token}` },
+      const authToken = token || localStorage.getItem("token") || sessionStorage.getItem("token")
+      const response = await axios.get("/api/products", {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
       })
       const data = Array.isArray(response.data) ? response.data : response.data.products || []
       setProducts(data)
@@ -388,14 +394,17 @@ function AdminProductlist({ updateTotalProducts, updateLowStockProducts }) {
   const handleDeleteProduct = useCallback(
     async (id) => {
       try {
-        await axios.delete(`https://api.silksew.com/api/products/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const authToken = token || localStorage.getItem("token") || sessionStorage.getItem("token")
+        await axios.delete(`/api/products/${id}`, {
+          headers: { Authorization: `Bearer ${authToken}` },
         })
         toast.success("Product deleted successfully!")
         fetchProducts()
       } catch (error) {
-        console.error("Error deleting product:", error.message)
-        toast.error("Failed to delete product.")
+        const status = error?.response?.status
+        const data = error?.response?.data
+        console.error("Error deleting product:", status, data || error.message)
+        toast.error(data?.message || "Failed to delete product.")
       }
     },
     [token, fetchProducts],
@@ -694,16 +703,17 @@ function AdminProductlist({ updateTotalProducts, updateLowStockProducts }) {
 
         productData.append("images", JSON.stringify(uploadedImagesByColor))
 
+        const authToken = token || localStorage.getItem("token") || sessionStorage.getItem("token")
         const response = isAdding
-          ? await axios.post("https://api.silksew.com/api/products", productData, {
+          ? await axios.post("/api/products", productData, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${authToken}`,
               "Content-Type": "multipart/form-data",
             },
           })
-          : await axios.put(`https://api.silksew.com/api/products/${editingProduct._id}`, productData, {
+          : await axios.put(`/api/products/${editingProduct._id}`, productData, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${authToken}`,
               "Content-Type": "multipart/form-data",
             },
           })

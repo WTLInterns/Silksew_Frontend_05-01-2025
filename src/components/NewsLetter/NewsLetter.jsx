@@ -108,7 +108,7 @@ export function Newsletter() {
   }
 
   try {
-    const response = await fetch("https://api.silksew.com/api/subscribe", {
+    const response = await fetch("http://localhost:5003/api/subscribe", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

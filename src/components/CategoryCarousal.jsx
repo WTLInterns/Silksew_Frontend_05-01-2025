@@ -117,7 +117,7 @@
 //         // Fetch offers for each category
 //         for (let cat of categories) {
 //           try {
-//             const res = await axios.get(`https://api.silksew.com/api/offer/get-offer/${cat.apiCategory}`);
+//             const res = await axios.get(`http://localhost:5003/api/offer/get-offer/${cat.apiCategory}`);
 //             console.log(`Offer response for ${cat.name}:`, res.data);
 
 //             if (res.data.success && res.data.offer?.active) {
@@ -482,7 +482,7 @@ function CategoryCarousel() {
         // Fetch offers for each category
         for (const cat of categories) {
           try {
-            const res = await axios.get(`https://api.silksew.com/api/offer/get-offer/${cat.apiCategory}`)
+            const res = await axios.get(`http://localhost:5003/api/offer/get-offer/${cat.apiCategory}`)
             console.log(`Offer response for ${cat.name}:`, res.data)
 
             if (res.data.success && res.data.offer?.active) {

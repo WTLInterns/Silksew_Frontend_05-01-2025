@@ -372,12 +372,13 @@ const AdminProductForm = () => {
       productData.append("images", JSON.stringify(uploadedImagesByColor));
 
       // Send to backend
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await axios.post(
-        "https://api.silksew.com/api/products",
+        "http://localhost:5003/api/products",
         productData,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: token ? `Bearer ${token}` : "",
             "Content-Type": "multipart/form-data",
           },
         }
