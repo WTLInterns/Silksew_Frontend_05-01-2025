@@ -704,10 +704,11 @@ const Checkout = () => {
     setShowSuccessPopup(true)
 
     try {
-      const token = localStorage.getItem("token")
+      // Check both sessionStorage and localStorage for token
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token")
       if (!token) {
-        toast.error("You are not authorized. Please log in.")
-        navigate("/login")
+        toast.error("Your session has expired. Please log in again.")
+        navigate("/login", { state: { from: "/checkout" } })
         return
       }
 
@@ -754,7 +755,10 @@ const Checkout = () => {
       }
 
       const response = await axios.post(`${BASEURL}/api/orders/place`, orderData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       })
 
       if (response.data.success) {

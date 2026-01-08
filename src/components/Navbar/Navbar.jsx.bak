@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useContext } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { Search, User, Heart, ShoppingBag, ChevronDown, X, Menu } from "lucide-react"
@@ -6,7 +7,7 @@ import { ShopContext } from "../../context/ShopContext"
 import FavoriteButton from '../common/FavoriteButton';
 import logo from "../../components/Assets/siksewmodified.png"
 // import { AuthContext } from "../../context/AuthContext"
-import { AuthContext } from "../../context/AuthContext"
+import {AuthContext} from "../../context/AuthContext"
 import Footer from "../Footer/Footer";
 import "./Navbar.css"
 const Navbar = () => {
@@ -486,10 +487,9 @@ const Navbar = () => {
   }
 
   const isProfilePage = location.pathname === '/profile';
-
-  if (isProfilePage) {
-    return null; // Don't render navbar on profile page
-  }
+  
+  // Don't hide navbar on profile page, just adjust the style if needed
+  const navbarStyle = isProfilePage ? { boxShadow: 'none', borderBottom: '1px solid #e5e7eb' } : {};
 
   return (
 
@@ -726,545 +726,518 @@ const Navbar = () => {
             {/* User Icons */}
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <Link
-                to={isAuthenticated() ? "/profile" : "/login"}  // CHANGE HERE
+                to={isAuthenticated() ? "/profile" : "/login"}
                 style={{ color: "#374151" }}
                 onMouseOver={(e) => e.target.style.color = "#d97706"}
                 onMouseOut={(e) => e.target.style.color = "#374151"}
               >
                 <User size={22} />
               </Link>
-            
+              <Link
+                to="/favorites"
+                style={{ position: "relative", color: "#374151" }}
+                onMouseOver={(e) => e.target.style.color = "#d97706"}
+                onMouseOut={(e) => e.target.style.color = "#374151"}
+              >
+                <Heart size={22} />
+                {favoritesCount > 0 && (
+                  <span style={{
+                    position: "absolute",
+                    top: "-8px",
+                    right: "-8px",
+                    backgroundColor: "#dc2626",
+                    color: "white",
+                    borderRadius: "50%",
+                    padding: "2px 6px",
+                    fontSize: "10px",
+                    fontWeight: "600",
+                    minWidth: "18px",
+                    height: "18px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    {favoritesCount}
+                  </span>
+                )}
+              </Link>
 
-            <Link
-              to="/favorites"
-              style={{ position: "relative", color: "#374151" }}
-              onMouseOver={(e) => e.target.style.color = "#d97706"}
-              onMouseOut={(e) => e.target.style.color = "#374151"}
-            >
-              <Heart size={22} />
-              {favoritesCount > 0 && (
-                <span style={{
-                  position: "absolute",
-                  top: "-8px",
-                  right: "-8px",
-                  backgroundColor: "#dc2626",
-                  color: "white",
-                  borderRadius: "50%",
-                  padding: "2px 6px",
-                  fontSize: "10px",
-                  fontWeight: "600",
-                  minWidth: "18px",
-                  height: "18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}>
-                  {favoritesCount}
-                </span>
-              )}
-            </Link>
+              <Link
+                to="/cart"
+                style={{ position: "relative", color: "#374151" }}
+                onMouseOver={(e) => e.target.style.color = "#d97706"}
+                onMouseOut={(e) => e.target.style.color = "#374151"}
+              >
+                <ShoppingBag size={22} />
+                {cartCount > 0 && (
+                  <span style={{
+                    position: "absolute",
+                    top: "-8px",
+                    right: "-8px",
+                    backgroundColor: "#dc2626",
+                    color: "white",
+                    borderRadius: "50%",
+                    padding: "2px 6px",
+                    fontSize: "10px",
+                    fontWeight: "600",
+                    minWidth: "18px",
+                    height: "18px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
 
-            <Link
-              to="/cart"
-              style={{ position: "relative", color: "#374151" }}
-              onMouseOver={(e) => e.target.style.color = "#d97706"}
-              onMouseOut={(e) => e.target.style.color = "#374151"}
+            {/* Mobile Search icon (visible on mobile via CSS) */}
+            <button
+              aria-label="Open search"
+              className="mobile-search-button"
+              onClick={() => setShowMobileSearch(true)}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer"
+              }}
             >
-              <ShoppingBag size={22} />
-              {cartCount > 0 && (
-                <span style={{
-                  position: "absolute",
-                  top: "-8px",
-                  right: "-8px",
-                  backgroundColor: "#dc2626",
-                  color: "white",
-                  borderRadius: "50%",
-                  padding: "2px 6px",
-                  fontSize: "10px",
-                  fontWeight: "600",
-                  minWidth: "18px",
-                  height: "18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}>
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+              <Search className="hamburger-icon" />
+            </button>
+
+            {/* Hamburger button (visible on mobile via CSS) */}
+            <button 
+              aria-label="Toggle navigation"
+              className={`hamburger-menu ${showMobileMenu ? 'active' : ''}`}
+              onClick={() => setShowMobileMenu((prev) => !prev)}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer"
+              }}
+              aria-expanded={showMobileMenu}
+            >
+              {showMobileMenu ? <X className="hamburger-icon" /> : <Menu className="hamburger-icon" />}
+            </button>
           </div>
-
-          {/* Mobile Search icon (visible on mobile via CSS) */}
-          <button
-            aria-label="Open search"
-            className="mobile-search-button"
-            onClick={() => setShowMobileSearch(true)}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer"
-            }}
-          >
-            <Search className="hamburger-icon" />
-          </button>
-
-          {/* Hamburger button (visible on mobile via CSS) */}
-          <button
-            aria-label="Toggle navigation"
-            className={`hamburger-menu ${showMobileMenu ? 'active' : ''}`}
-            onClick={() => setShowMobileMenu((prev) => !prev)}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer"
-            }}
-            aria-expanded={showMobileMenu}
-          >
-            {showMobileMenu ? <X className="hamburger-icon" /> : <Menu className="hamburger-icon" />}
-          </button>
         </div>
       </div>
-    </div>
 
-      {/* Add padding to the top of the main content to account for fixed navbar */ }
-  <div style={{ paddingTop: "70px" }}>
-    {/* Your main page content goes here */}
-  </div>
+      {/* Adding padding to the top of the main content to account for fixed nav bar */}
+      <div style={{ paddingTop: "70px" }}>
+        {/* Your main content goes here */}
+      </div>
 
-  {/* Mobile Search Overlay */ }
-  {
-    showMobileSearch && (
-      <div
-        style={{
-          position: "fixed",
-          top: "70px",
-          left: 0,
-          right: 0,
-          backgroundColor: "#fff",
-          borderBottom: "1px solid #e5e7eb",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-          zIndex: 1100,
-          padding: "10px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px"
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchQuery}
-          onChange={handleSearch}
-          onKeyPress={(e) => {
-            handleKeyPress(e)
-            if (e.key === 'Enter') setShowMobileSearch(false)
-          }}
-          autoFocus
+      {/* Mobile Search Overlay */}
+      {showMobileSearch && (
+        <div
           style={{
-            flex: 1,
-            padding: "10px 12px",
-            border: "1px solid #d1d5db",
-            borderRadius: "8px",
-            fontSize: "14px",
-            outline: "none"
-          }}
-          onFocus={(e) => e.target.style.borderColor = "#d97706"}
-          onBlur={(e) => e.target.style.borderColor = "#d1d5db"}
-        />
-        <button
-          aria-label="Close search"
-          onClick={() => setShowMobileSearch(false)}
-          style={{
-            background: "#f3f4f6",
-            border: "1px solid #e5e7eb",
-            borderRadius: "8px",
-            padding: "8px",
-            cursor: "pointer"
+            position: "fixed",
+            top: "70px",
+            left: 0,
+            right: 0,
+            backgroundColor: "#fff",
+            borderBottom: "1px solid #e5e7eb",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+            zIndex: 1100,
+            padding: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
           }}
         >
-          <X size={18} />
-        </button>
-      </div>
-    )
-  }
-
-  {/* Mobile Menu Panel */ }
-  {
-    showMobileMenu && (
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={handleSearch}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') setShowMobileSearch(false)
+            }}
+            autoFocus
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              border: "1px solid #d1d5db",
+              borderRadius: "25px",
+              fontSize: "14px",
+              outline: "none"
+            }}
+            onFocus={(e) => e.target.style.borderColor = "#d97706"}
+            onBlur={(e) => e.target.style.borderColor = "#d1d5db"}
+          />
+          <button
+            aria-label="Close search"
+            onClick={() => setShowMobileSearch(false)}
+            style={{
+              background: "#f3f4f6",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              padding: "8px",
+              cursor: "pointer"
+            }}
+          >
+        />
+          <buon
+             ria-bel="Close search"
+            onClk={() => setShowMobileSearch(false)}
+          style={{
+              background: "#f3f4f6",             border: "1px soli#e5e7eb",
+              bor erRaus: "8px",
+              padding: "8px ,
+            cursor: "po nter
+          }}
+        >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+     {/* Mobile Menu Panel */}
+      {showMobileMenu &&  
       <div
-        ref={mobileNavRef}
-        className="nav-menu active"
-        style={{
-          position: "fixed",
-          top: "70px",
+          ref={mobileNavRef}
+          className="nav-menu active"
+          style= {
+          position: " ixed
+            top: "70px",
           left: 0,
-          right: 0,
-          backgroundColor: "#fff",
-          borderBottom: "1px solid #e5e7eb",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-          zIndex: 1100,
-          padding: "12px 16px",
-          maxHeight: "calc(100vh - 70px)",
-          overflowY: "auto"
+            right: 0,
+            back rounolor: "#fff",
+            borderBott m: "x solid #e5e7eb ,
+          boxShadow: "0  0px px rgba(0,0,0,0.08)",
+           Index: 1100,
+            paddi g: "px 16px",
+            maxHeight: "c lc(1vh - 70px)",
+            overflowY: "auto"
         }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {Object.keys(navigationMenu).map((menuItem) => (
-            <div key={menuItem} style={{ borderBottom: "1px solid #f3f4f6", padding: "8px 0" }}>
-              <button
-                onClick={() => {
-                  fetchProductsBySubcategory(menuItem)
-                  setShowMobileMenu(false)
-                }}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  background: "transparent",
+        >
+          <div style={{ d spla "flex", flexDirection: "colum ", g: "8px" }}>
+            {Object keysavigationMenu).map((menuItem) =  (
+            <div key={menuItem}  tyle{ borderBottom: "1px solid #f3f4f6 , paing: "8px 0" }}>
+                <tton
+                onClick={(  => 
+                    fetchProductsB Subcagory(menuItem)
+                    setShowMobileMenu(false)
+                  }}                  s yle={
+                    width: "100%",
+                    dilay: "flex",
+                    alignItems: "center",
+                    justifyContent: "space- etween
+                    background: "transparent",
                   border: "none",
                   fontSize: "15px",
                   fontWeight: 600,
                   color: "#111827",
-                  padding: "8px 4px",
+                    padding: "8px 4 x",
                   cursor: "pointer"
                 }}
-              >
-                <span>{menuItem}</span>
-                {navigationMenu[menuItem].length > 0 && <ChevronDown size={16} />}
+                >                 <span>{menu tem}<pan>
+                  {navigationMen [menuem].length > 0 && <ChevronDown size={16} />}
               </button>
-              {navigationMenu[menuItem].length > 0 && (
-                <div style={{ paddingLeft: "8px", display: "grid", gap: "6px", paddingBottom: "8px" }}>
-                  {navigationMenu[menuItem].map((subItem) => (
-                    <button
-                      key={subItem}
-                      onClick={() => {
-                        fetchProductsBySubcategory(subItem)
-                        setShowMobileMenu(false)
-                      }}
-                      style={{
-                        textAlign: "left",
-                        background: "transparent",
-                        border: "none",
-                        color: "#374151",
-                        fontSize: "14px",
-                        padding: "6px 4px",
-                        cursor: "pointer"
-                      }}
-                    >
-                      {subItem}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
+                 navigionMenu[menuItem].length > 0 && (
+                <div style={{ paddingLeft: "8 x", dplay: "grid", gap: "6px", paddingBottom  "8px}}>
+                    {navigatio Menu[nuItem].map((subIt m) =>
+                      <tton
+                        k={subItem}
+                      onClick={(  => {                        fetchPro uctsBubcategory(s bItem
+                        sehowMo ileM nf
+   lse)
+                    }}
+                        style={{
+                  
+         textAlign: "left",
+                       ackground: "transparent",
+                         der: "none",
+                      color: " 374151                          fontSize: "14px",
+                      pad ing: "4px",
+                      cur or: "per"
+                        }}
+                                             {subItem 
+                  </button>
+                ))}
+               /div>
+               
+              </div>
+            ))}        /div>
+        </d v>
+   }
 
-  {/* Subcategory Products Display - Fixed overlay positioned higher */ }
-  {
-    selectedSubcategory && showOnlyProducts &&
-    !location.pathname.startsWith("/admin") && (
-      <div style={{
-        position: 'fixed',
-        top: '70px', // Positioned right below the navbar
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(249, 250, 251, 0.98)",
-        backdropFilter: "blur(5px)",
-        padding: "30px 20px 0",
-        overflowY: "auto",
-        zIndex: 999,
-        animation: "fadeIn 0.3s ease-in-out",
-        display: "flex",
-        flexDirection: "column"
-      }}>
+      {/* Subcateg ry Prod Disp ay - Fioverlay positione  higher
+      {selectedSubcat gory &&wOnlyProducts &&
+        !loon.pathname.startsWith("/ dmin") 
+          <div st{{
+           ition: 'fixed',
+          p: '70px', // Position d rightow the navbar
+            left: 0,
+         ight: 0,
+            botto : 0,
+        backgroundColor: "rg a(249,  251, 0.98)",
+            baopFilter: "blur(5,
+            paddi g: "30ppx 0",
+            overf owY: "a,
+            zIndex: 999 
+        animation: "fadeIn 0.3  ease-it",
+            d splay: x",
+            flexDirection: " olumn"       }}>
         <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          position: "relative",
-          flex: "1"
+              maxWidth: "1400px",
+              margin: "0 auto",
+              position: "relative",
+              flex: "1"
         }}>
-          <div style={{
+               style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '30px',
-            padding: "0 10px"
+                ifyContent: 'space-between',
+               gnItems: 'center',
+                 arginBm: '30px',             padding: "0 1 px"
           }}>
-            <h2 style={{
-              fontSize: "28px",
-              fontWeight: "700",
+                <h  style
+                  fontSize: "28px",               fontWeight: "700",
               color: "#1f2937",
               margin: 0,
-              textTransform: "capitalize"
+                  Transform: "capitalize"
             }}>
-              {selectedSubcategory} <span style={{ fontSize: "18px", color: "#6b7280", fontWeight: "500" }}>({subcategoryProducts.length} products)</span>
-            </h2>
-            <button
-              onClick={() => {
-                setSelectedSubcategory("");
-                setShowOnlyProducts(false);
-                // Reset URL when closing modal
-                window.history.pushState({}, '', '/shop');
-              }}
-              style={{
-                padding: "10px 18px",
-                backgroundColor: "#dc2626",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontWeight: "500",
-                transition: "all 0.2s ease"
-              }}
-              onMouseOver={(e) => {
-                e.target.style.backgroundColor = "#b91c1c";
-                e.target.style.transform = "scale(1.05)";
-              }}
-              onMouseOut={(e) => {
-                e.target.style.backgroundColor = "#dc2626";
-                e.target.style.transform = "scale(1)";
-              }}
-            >
-              <X size={18} />
-
-            </button>
-          </div>
-
-          {searchLoading ? (
-            <div style={{ textAlign: "center", padding: "60px" }}>
-              <div style={{
-                display: "inline-block",
-                width: "40px",
-                height: "40px",
-                border: "3px solid #f3f3f3",
-                borderTop: "3px solid #d97706",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite"
-              }}></div>
-              <p style={{ marginTop: "20px", color: "#6b7280", fontSize: "16px" }}>Loading products...</p>
-            </div>
-          ) : subcategoryProducts.length > 0 ? (
-            <div className="navbar-products-grid" style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "24px",
-              paddingBottom: "30px"
-            }}>
-              {subcategoryProducts.map((product) => {
-                const priceInfo = getDisplayPrices(product)
-                const offerActive = isWithinOfferWindow(product.offerStartDate, product.offerEndDate)
-                const countdown = offerActive ? getOfferCountdownLocal(product.offerEndDate) : null
-                return (
-                  <div key={product._id} style={{
-                    backgroundColor: "#fff",
-                    borderRadius: "12px",
-                    padding: "16px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    transition: "all 0.3s ease",
-                    cursor: "pointer",
-                    position: "relative",
-                    overflow: "hidden"
+                  {s lectedStegory} <span style={{ fontSize  "18px"lor: "#6b7280", fontW ight: " }}>({subcategoryProducts.le gth} prts)</span>
+                </h2>
+    
+  
+                         onClick={() => {                   setSelectedSubcategory("") 
+                  setShowOnlyProducts(fals );
+                }}
+                  style= {
+                  padding: "10px 18px",
+                    bkgroundCol r: "#dc26",
+                    color  "white                    border: "none",
+                    borddius: "6px",
+                    cursor: "pointe ",
+                displ"flex",
+                    a ignItemcenter",
+                    gap: "8px",
+                  ntWeight: "500",
+                    transiti n: "alls ease"               }}
+              onClick={() =>  
+              setS owOnlyPcts(false);               setSelectedSubcat gory(''                  // Reset URL when closing modal
+                  ww.history.pushState({}, '', '/s);
+                }}
+                oneOver={(e) => {
+                e.target.style.backgroun Color =91c1c";
+                    e.target. tyle.trorm = "scale(1.05)";
+                  } 
+              onMouseOut={(e) => {                 e.target.style.backgroundColor = "# c2626";                  e.targeyle.transform = "scale(1)";
                   }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = "translateY(-6px)";
-                      e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+                >
+                  <X size={1 } />
+             </but
+              </div>
+
+              {sear hLoadi (
+                <d v styl textAlign: "center", pad ing: "" }}>
+                  <div style={{
+                    display: " nline-k",
+                    wid"40px",
+                    height0px",
+                border: "3px solid #f3f3f3",
+                    borop: "3px solid #d97706",
+                    borderRa ius: ",
+                    animation: "spin 1s linear infinite"
+                  }}></div>
+              <p style={{ marginTop: "20px", color: "#6b7280", fontSize: "16px" }}>Loading products...</p>             </div>
+              subcategoryProducts.length > 0 ? (
+                <style={{
+                  display: "g id",
+              gridTemplateColumns: " epeat(-fill, minmax(240px, 1fr))",
+              gap: "25px",
+                  paddingBottom: "30 x"
+            }}>
+                  {subcatego yProdumap((product) => {
+                    t priceInfo = getDisplayPrices(produ t)
+                const offerActive = isWiOfferWindow(produ t.offertDate, product.offerEndDate)
+                const countdown = offerActive ? getOfferCountdownLocal(product.offer ndDatenull
+                    return (
+                      <div key={product._id  style
+                       kgroundColor: "#fff",
+                     orderRadius: "12px",
+                        padding: "1 px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                        sition: "all 0.3  ease",                      cursor: "pointer",
+                        pion: "relative" 
+                    overflow: "hidden"
+                      }}
+                    onMouseOver {(e) =>                          e.currentTa get.styransform = "translateY(-6px) ;
+                      e.currentTar et.stylxShadow = "0 8px 20px r ba(0,0,12)";
                     }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = "none";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
-                    }}
-                    onClick={() => handleProductClick(product._id)}
+                        onMouseOut={(e) => {
+                        currentTarget.style.tr nsform one";
+                          e.cutTarget.style.boxShadow = "0 4 x 12px (0,0,0,0.08)";
+                                                onClick={()  > handlductClick(product._id)}
                   >
-                    {/* Removed top-left pill per request */}
-                    <div style={{
-                      position: "absolute",
-                      top: "12px",
+                        {/* Remove  top-leill per request */}
+                     div style={{
+                      position: "ab olute",                        top: "12px",
                       right: "12px",
-                      zIndex: 2
-                    }}>
-                      <FavoriteButton productId={product._id} size={20} />
+                        ndex: 2
+                        }}>                        <FavoriteB tton prtId={product._id} size={20} />
                     </div>
 
-                    <div style={{
-                      width: "100%",
-                      height: "220px",
-                      borderRadius: "8px",
+                        <divle={{
+                          width: "100%",
+                      height:  220px",                        borderRadius: "8p ",
                       overflow: "hidden",
-                      marginBottom: "14px",
+                          mnBottom: "14px",
                       position: "relative"
                     }}>
-                      <img
-                        src={getProductImage(product)}
-                        alt={product.name}
-                        style={{
+                          <img
+                        src={getProductIm ge(prod}
+                            alt={p oduct.n
+                            style={{
                           width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          transition: "transform 0.3s ease"
+                          h ight: "",
+                              obje tFit: "r",
+                              transition  "trans 0.3s ease"
                         }}
-                        onMouseOver={(e) => {
-                          e.target.style.transform = "scale(1.05)";
+                            oseOver={(e) => {
+                              e.tt.style.transform = "scale(1.05)" 
                         }}
                         onMouseOut={(e) => {
-                          e.target.style.transform = "scale(1)";
-                        }}
+                              e.target.style.transform = "sca e(1)";                         }}
                         onError={(e) => {
-                          e.target.src = "/placeholder-image.jpg"
-                        }}
-                      />
-                      {/* Discount Badge */}
-                      {priceInfo.hasDiscount && (
-                        <div
+                          e.target.src = "/placeholder-image.jpg"                         }}
+                         
+                          {/* Discount B dge */}                        {priceIn o.hasDint && (
+                            < iv
                           style={{
-                            position: "absolute",
-                            top: "8px",
+                            position: "absolute" 
+                            top: ",
                             left: "8px",
-                            backgroundColor: priceInfo.isSpecialOffer ? "#16a34a" : "#dc2626",
-                            color: "white",
-                            padding: "4px 8px",
-                            borderRadius: "12px",
+                                backgroundColor: priceInfo. sSpeciaer ? "#16a34a" : "#dc2626",
+                                co or: "wh,
+                            padding: "4px 8 x",
+                            borddius: "12px",
                             fontSize: "11px",
                             fontWeight: "bold",
                             zIndex: 3,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px"
-                          }}
+                            display: "flex",                             alignItems: " enter",                              g p: "4px                             }}
                         >
-                          {priceInfo.isSpecialOffer && <span>Special Offer</span>}
-                          <span>{priceInfo.discountPercent}% OFF</span>
+                              {pInfo.isSpecialOffer && <span>Special Of er</spa
+                              <span {priceIniscountPercent}% OFF</span>
                         </div>
                       )}
-                    </div>
+                        <>
 
-                    <h3 style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      margin: "0 0 8px 0",
-                      color: "#1f2937",
+                        style={{
+                          fize: "16px",
+                          Weight: "600",
+                          margin 0 8px 0",
+                      color: "#1f2937" 
                       lineHeight: "1.4",
-                      height: "44px",
+                          height: "44px",
                       overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
+                      textOverflow: "ellipsis",                       display: "-webkit-box",
                       WebkitLineClamp: "2",
-                      WebkitBoxOrient: "vertical"
-                    }}>
-                      {product.name}
+                      WebkitBoxOrie t: "vert"
+                        }}>                       {product.name}
                     </h3>
 
                     <div style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px"
+                          display: "flex",
+                      flexDirection: "column",                       gap: "8px"
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                        <p style={{
+                          <div st le={{ day: 'flex', alignItems: 'baseline', gap  '8px' 
+                            <p style={{
                           fontSize: "18px",
-                          fontWeight: "700",
-                          color: "#1f2937",
-                          margin: "0"
+                            ntWeight: "700",                           color  "#1f293
+                              margin: "0"
                         }}>
-                          ₹{priceInfo.currentPrice}
-                        </p>
-                        {priceInfo.hasDiscount && priceInfo.oldPrice && (
-                          <span style={{
-                            fontSize: "13px",
-                            fontWeight: 500,
-                            color: "#6b7280",
+                              ₹{priceInfo.currentPrice}
+                            </p>
+                        {priceInfo.hasDiscount && pri eInfo.olde && (
+                              <span e={{
+                                fontSize:px",
+                                fontWeigh00,
+                                color: "280",
                             textDecoration: 'line-through'
-                          }}>₹{priceInfo.oldPrice}</span>
+                              }}>₹{pric Info.oldP}</span>
                         )}
-                      </div>
+                       /div>
 
-                      {/* Savings and countdown info */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        {priceInfo.hasDiscount && (
-                          <span style={{
-                            fontSize: "11px",
-                            color: "#16a34a",
-                            fontWeight: "600"
-                          }}>
-                            You save ₹{priceInfo.oldPrice - priceInfo.currentPrice}
+                          {/* Savings a d countdonfo */}
+                          <div styl display: 'flex', justifyContent: 'space-between , alignIt 'center' }}>
+                            {prifo.hasDiscount && (
+                            pan style={{
+                                fone: "11px",
+                                co "#16a34a",
+                                foight: "600"
+                              }}>
+                            You save  {priceInfdPrice - priceIn o.currente}
                           </span>
                         )}
-                        {offerActive && countdown && (
-                          <span style={{
-                            border: '1px solid #16a34a',
-                            color: '#16a34a',
-                            padding: '2px 6px',
-                            borderRadius: 9999,
-                            fontWeight: 600,
-                            fontSize: '10px',
-                            whiteSpace: 'nowrap'
-                          }}>{countdown}</span>
-                        )}
-                      </div>
-                    </div>
+                        {offtive && c untdown &
+                          <span styl
+                                border: '1px solid #16a34 ',
+                            color: '#4a',
+                             adding: '2px 6px',
+                            borderRadius: 9 99,
+                            fontWeight: 6 0,
+                            fontSi'10px',
+                                whiteSpace: 'nowrap'
+                           }>{countdown}</span>
+                            )}
+                      </d v>
+                     /div>
                   </div>
                 )
-              })}
+                  })}
 
-            </div>
-          ) : (
-            <div style={{ textAlign: "center", padding: "60px" }}>
+                v>
+              ) : (
+                <divle={{ tex Align: "ce", padding: "60px  }}>
               <div style={{
                 fontSize: "60px",
-                color: "#e5e7eb",
-                marginBottom: "20px",
-                animation: "bounce 2s infinite"
-              }}>🛍️</div>
-              <p style={{ color: "#6b7280", fontSize: "18px", marginBottom: "30px" }}>
-                No products found in "{selectedSubcategory}" category.
+                    color: "7eb",
+                    marginBo: "20px",
+                    animn: "bounce 2s infinite"
+               }>🛍️</div>
+                  <p styl color: "#6b7280", fontSize  "18px", mnBottom: "30px" }}>
+                No products found in "{selectedSub ategory}" gory.
               </p>
-              <button
+                  <butt n
                 onClick={() => {
-                  setSelectedSubcategory("");
-                  setShowOnlyProducts(false);
+                      s tSelectedStegory("" ;
+                  setShowOnlyProduct (false);
                 }}
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: "#d97706",
-                  color: "white",
-                  border: "none",
+                    style={{
+                   adding: "124px",
+                  backgroundColor  "#d97706"                     co "white ,
+                  br: "non ",
                   borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                  fontSize: "16px",
-                  transition: "all 0.2s ease"
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "#b45309";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "#d97706";
-                }}
-              >
-                Continue Shopping
-              </button>
+                   ursor: "p inter",
+              
+  fontWei "500",
+                   f ntSize: "1,
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = "#b45309";
+                    }}
+                    onMouseOut={(e) => {                   e.target.st yle.backgroundColor = "#d97706";
+                    }}
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Footer inside the product container */}
-        <Footer />
+            {/* Footer inside the product container */}
+            <Footer />
 
-      </div>
-    )
-  }
+          </div>
+        )}
 
-  {/* CSS animations */}
-  <style>
-    {`
+      {/* CSS animations */}
+      <style>
+        {`
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -1273,37 +1246,171 @@ const Navbar = () => {
             from { opacity: 0; }
             to { opacity: 1; }
           }
-          @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-          }
-          
-          /* Responsive grid for navbar products */
-          @media (max-width: 1024px) {
-            .navbar-products-grid {
-              grid-template-columns: repeat(2, 1fr) !important;
-              gap: 20px !important;
-            }
-          }
-          
-          @media (max-width: 768px) {
-            .navbar-products-grid {
-              grid-template-columns: repeat(2, 1fr) !important;
-              gap: 15px !important;
-            }
-          }
-          
-          @media (max-width: 480px) {
-            .navbar-products-grid {
-              grid-template-columns: 1fr !important;
-              gap: 15px !important;
-            }
-          }
         `}
-  </style>
-</div>
-)
+      </style>
+    </div>
+  )
 }
 
-export default Navbar;
+export default Navbar
+
+                         />
+                          {/* Discount Badge */}
+                          {priceInfo.hasDiscount && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "8px",
+                                left: "8px",
+                                backgroundColor: priceInfo.isSpecialOffer ? "#16a34a" : "#dc2626",
+                                color: "white",
+                                padding: "4px 8px",
+                                borderRadius: "12px",
+                                fontSize: "11px",
+                                fontWeight: "bold",
+                                zIndex: 3,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px"
+                              }}
+                            >
+                              {priceInfo.isSpecialOffer && <span>Special Offer</span>}
+                              <span>{priceInfo.discountPercent}% OFF</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <h3 style={{
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          margin: "0 0 8px 0",
+                          color: "#1f2937",
+                          lineHeight: "1.4",
+                          height: "44px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: "2",
+                          WebkitBoxOrient: "vertical"
+                        }}>
+                          {product.name}
+                        </h3>
+
+                        <div style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "8px"
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                            <p style={{
+                              fontSize: "18px",
+                              fontWeight: "700",
+                              color: "#1f2937",
+                              margin: "0"
+                            }}>
+                              ₹{priceInfo.currentPrice}
+                            </p>
+                            {priceInfo.hasDiscount && priceInfo.oldPrice && (
+                              <span style={{
+                                fontSize: "13px",
+                                fontWeight: 500,
+                                color: "#6b7280",
+                                textDecoration: 'line-through'
+                              }}>₹{priceInfo.oldPrice}</span>
+                            )}
+                          </div>
+
+                          {/* Savings and countdown info */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            {priceInfo.hasDiscount && (
+                              <span style={{
+                                fontSize: "11px",
+                                color: "#16a34a",
+                                fontWeight: "600"
+                              }}>
+                                You save ₹{priceInfo.oldPrice - priceInfo.currentPrice}
+                              </span>
+                            )}
+                            {offerActive && countdown && (
+                              <span style={{
+                                border: '1px solid #16a34a',
+                                color: '#16a34a',
+                                padding: '2px 6px',
+                                borderRadius: 9999,
+                                fontWeight: 600,
+                                fontSize: '10px',
+                                whiteSpace: 'nowrap'
+                              }}>{countdown}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "60px" }}>
+                  <div style={{
+                    fontSize: "60px",
+                    color: "#e5e7eb",
+                    marginBottom: "20px",
+                    animation: "bounce 2s infinite"
+                  }}>🛍️</div>
+                  <p style={{ color: "#6b7280", fontSize: "18px", marginBottom: "30px" }}>
+                    No products found in "{selectedSubcategory}" category.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSelectedSubcategory("");
+                      setShowOnlyProducts(false);
+                    }}
+                    style={{
+                      padding: "12px 24px",
+                      backgroundColor: "#d97706",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontWeight: "500",
+                      fontSize: "16px",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = "#b45309";
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = "#d97706";
+                    }}
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Footer inside the product container */}
+            <Footer />
+
+          </div>
+        )}
+
+      {/* CSS animations */}
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+        `}
+      </style>
+    </div>
+  )
+}
+
+export default Navbar
+

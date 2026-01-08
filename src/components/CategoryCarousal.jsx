@@ -968,7 +968,7 @@ function CategoryCarousel() {
     
     const interval = setInterval(() => {
       handleNext()
-    }, 5000)
+    }, 5003)
     
     return () => clearInterval(interval)
   }, [isHovering, isAnimating, handleNext])

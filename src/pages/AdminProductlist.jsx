@@ -1268,9 +1268,7 @@ function AdminProductlist({ updateTotalProducts, updateLowStockProducts }) {
         </div>
       ) : (
         <div>
-          <Button onClick={handleAddProduct} style={{ marginBottom: 16, backgroundColor: "black", color: "white", padding: 20 }}>
-            <PlusOutlined style={{ color: "white", fontWeight: "bold" }} /> Add New Product
-          </Button>
+          
           {renderProductTable()}
           {renderPagination()}
         </div>

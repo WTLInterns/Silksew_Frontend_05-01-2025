@@ -40,60 +40,134 @@ const UserProfileButtons = () => {
 
   const fetchUserData = useCallback(async () => {
     try {
-      const authToken = localStorage.getItem("token")
+      const authToken = sessionStorage.getItem("token") || localStorage.getItem("token");
+      
       if (!authToken) {
-        toast.error("No authentication token found. Please log in.")
-        return
+        console.log("No auth token found, redirecting to login");
+        navigate("/login");
+        return;
       }
-      const response = await axios.get("https://api.silksew.com/api/userProfileDetail/user-profile", {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      })
 
-      setUserData(response.data)
-      setLoading(false)
+      const response = await axios.get(
+        "https://api.silksew.com/api/userProfileDetail/user-profile",
+        {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log("Profile response:", response.data);
+      
+      if (response.data) {
+        const userData = response.data.user || response.data;
+        if (userData) {
+          setUserData(prev => ({ ...prev, ...userData }));
+        } else {
+          throw new Error("Invalid user data format");
+        }
+      }
+      
+      setLoading(false);
     } catch (err) {
-      console.error("Error fetching user data:", err)
-      toast.error("Failed to fetch user data. Please try again later.")
-      setLoading(false)
+      console.error("Error in fetchUserData:", err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        toast.error("Session expired. Please log in again.");
+        navigate("/login");
+      } else {
+        toast.error(err.response?.data?.message || "Failed to load profile");
+      }
+      setLoading(false);
     }
-  }, [])
+  }, [token, navigate])
 
   const fetchUserProducts = useCallback(async () => {
     try {
-      const authToken = localStorage.getItem("token")
+      // Get token from both storage locations
+      const authToken = sessionStorage.getItem("token") || localStorage.getItem("token");
+      
       if (!authToken) {
-        toast.error("No authentication token found. Please log in.")
-        return
+        toast.error("Please log in to view your orders");
+        navigate("/login");
+        return;
       }
-      setLoadingProducts(true)
-      const response = await axios.get("https://api.silksew.com/api/orders", {
+      
+      setLoadingProducts(true);
+      
+      const response = await axios.get("https://api.silksew.com/api/orders/myorders", {
         headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      })
-      setUserProducts(response.data)
-      setLoadingProducts(false)
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.data) {
+        setUserProducts(Array.isArray(response.data) ? response.data : []);
+      } else {
+        throw new Error("No orders data received");
+      }
     } catch (err) {
-      console.error("Error fetching user products:", err)
-      toast.error("Failed to fetch user products. Please try again later.")
-      setLoadingProducts(false)
+      console.error("Error fetching user orders:", err);
+      
+      if (err.response?.status === 401) {
+        // Token is invalid or expired
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/login");
+      } else {
+        toast.error(err.response?.data?.message || "Failed to load your orders. Please try again later.");
+      }
+    } finally {
+      setLoadingProducts(false);
     }
-  }, [])
+  }, [navigate]);
 
   const handleLogoutClick = () => {
     logout()
     navigate("/login")
   }
 
-  const handleTabClick = (tabId) => {
+  const handleTabClick = async (tabId) => {
     if (tabId === "logout") {
-      handleLogoutClick()
+      handleLogoutClick();
+    } else if (tabId === "orders") {
+      // Check for token before showing orders
+      const authToken = sessionStorage.getItem("token") || localStorage.getItem("token");
+      
+      if (!authToken) {
+        toast.error("Please log in to view your orders");
+        navigate("/login");
+        return;
+      }
+      
+      try {
+        setLoadingProducts(true);
+        setActiveTab(tabId);
+        setIsSidebarOpen(false);
+        setIsEditing(false);
+        
+        // Fetch orders with the token
+        await fetchUserProducts();
+      } catch (error) {
+        console.error("Error handling orders tab:", error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          sessionStorage.removeItem("token");
+          toast.error("Your session has expired. Please log in again.");
+          navigate("/login");
+        }
+      } finally {
+        setLoadingProducts(false);
+      }
     } else {
-      setActiveTab(tabId)
-      setIsSidebarOpen(false)
-      setIsEditing(false)
+      setActiveTab(tabId);
+      setIsSidebarOpen(false);
+      setIsEditing(false);
     }
   }
 
@@ -102,27 +176,66 @@ const UserProfileButtons = () => {
   }
 
   const updateProfile = async (e) => {
-    e.preventDefault()
-
-    const token = localStorage.getItem("token")
-
+    e.preventDefault();
+    
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) {
-      console.log("No token found. Please log in.")
-      return
+      toast.error("Please log in to update your profile");
+      navigate("/login");
+      return;
     }
 
     try {
+      setLoading(true);
       const response = await axios.put(
         "https://api.silksew.com/api/updateUserProfileDetail/update-user-profile",
         userData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      toast.success("Profile Successfully Updated.")
-      setIsEditing(false)
+      console.log("Update response:", response.data);
+      
+      if (response.data) {
+        // Update the user data with the response
+        const updatedUser = response.data.user || response.data;
+        setUserData(prev => ({
+          ...prev,
+          ...updatedUser,
+          // Ensure we don't lose any existing fields
+          name: updatedUser.name || prev.name,
+          email: updatedUser.email || prev.email,
+          phone: updatedUser.phone || prev.phone
+        }));
+        
+        // Update token if a new one was provided
+        if (response.data.token) {
+          const newToken = response.data.token;
+          localStorage.setItem("token", newToken);
+          sessionStorage.setItem("token", newToken);
+        }
+        
+        toast.success("Profile updated successfully!");
+        setIsEditing(false);
+      } else {
+        throw new Error("No data received from server");
+      }
     } catch (error) {
-      console.error("Update failed:", error)
-      toast.error("Update failed. Please try again.")
+      console.error("Update error:", error);
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        toast.error("Session expired. Please log in again.");
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to update profile. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 

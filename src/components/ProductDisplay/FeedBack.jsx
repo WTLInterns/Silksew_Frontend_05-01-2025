@@ -20,38 +20,65 @@ const FeedBack = ({ productId, onNewFeedback }) => {
       return
     }
 
-    const userData = localStorage.getItem("user")
+    // Check both sessionStorage and localStorage for user data
+    const sessionUser = sessionStorage.getItem("user")
+    const localUser = localStorage.getItem("user")
+    const userData = sessionUser || localUser
+    
+    console.log("SessionStorage user:", sessionUser) // Debug log
+    console.log("LocalStorage user:", localUser) // Debug log
+    console.log("Final userData:", userData) // Debug log
+    
     if (userData) {
-      const user = JSON.parse(userData)
-      const userId = user.id
-      const name = user.name
-
-      if (!productId || !userId || !rating || !review || !name) {
-        alert("Missing fields")
-        return
-      }
-
       try {
-        const res = await axios.post("https://api.silksew.com/api/review/add", {
-          productId,
-          userId,
-          rating,
-          review,
-          name,
-        })
-        // console.log(res.data)
+        const user = JSON.parse(userData)
+        console.log("Parsed user:", user) // Debug log
+        
+        // Check for multiple possible user ID fields
+        const userId = user.id || user._id || user.userId
+        const name = user.name || user.username || user.firstName
+        
+        console.log("Extracted userId:", userId, "name:", name) // Debug log
 
-        // Call the callback function with the new review
-        onNewFeedback({ productId, userId, rating, review, name, _id: res.data._id })
+        if (!productId || !userId || !rating || !review || !name) {
+          console.log("Missing fields check:", {
+            productId: !!productId,
+            userId: !!userId,
+            rating: !!rating,
+            review: !!review,
+            name: !!name
+          })
+          alert(`Missing fields: ${!productId ? 'productId ' : ''}${!userId ? 'userId ' : ''}${!rating ? 'rating ' : ''}${!review ? 'review ' : ''}${!name ? 'name ' : ''}`)
+          return
+        }
 
-        // Reset form
-        setRating(0)
-        setReview("")
-      } catch (error) {
-        console.error("Error submitting feedback:", error)
-        alert("Failed to submit feedback. Please try again.")
+        try {
+          const res = await axios.post("https://api.silksew.com/api/review/add", {
+            productId,
+            userId,
+            rating,
+            review,
+            name,
+          })
+          console.log("Review submission response:", res.data) // Debug log
+
+          // Call the callback function with the new review
+          onNewFeedback({ productId, userId, rating, review, name, _id: res.data._id })
+
+          // Reset form
+          setRating(0)
+          setReview("")
+          alert("Feedback submitted successfully!")
+        } catch (error) {
+          console.error("Error submitting feedback:", error)
+          alert("Failed to submit feedback. Please try again.")
+        }
+      } catch (parseError) {
+        console.error("Error parsing user data:", parseError)
+        alert("Invalid user data. Please log in again.")
       }
     } else {
+      console.log("No user data found in either storage")
       alert("Please log in to submit feedback.")
     }
   }

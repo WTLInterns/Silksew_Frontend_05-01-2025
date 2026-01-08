@@ -13,7 +13,6 @@ const AdminUser = ({ updateTotalOrders }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 3
-  // eslint-disable-next-line no-unused-vars
   const { token } = useContext(ShopContext)
 
   const handleSearchChange = (e) => {
@@ -131,130 +130,374 @@ const AdminUser = ({ updateTotalOrders }) => {
   const currentItems = filteredOrders.slice(indexOfFirstItem, indexOfLastItem)
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
 
+  const styles = {
+    container: {
+      padding: "16px",
+      maxWidth: "1400px",
+      margin: "0 auto",
+      marginTop: "20px",
+      width: "100%",
+      boxSizing: "border-box"
+    },
+    header: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "stretch",
+      gap: "16px",
+      marginBottom: "20px",
+      width: "100%"
+    },
+    title: {
+      fontSize: "28px",
+      fontWeight: "bold",
+      textAlign: "left",
+      color: "#000",
+      margin: 0
+    },
+    searchContainer: {
+      display: "flex",
+      justifyContent: "left"
+    },
+    searchInput: {
+      width: "100%",
+      maxWidth: "100%",
+      padding: "12px 16px",
+      border: "1px solid #d1d5db",
+      borderRadius: "8px",
+      fontSize: "16px",
+      outline: "none",
+      transition: "all 0.3s ease",
+      boxSizing: "border-box",
+      WebkitAppearance: "none",
+      minHeight: "48px"
+    },
+    tableContainer: {
+      width: "100%",
+      overflowX: "auto",
+      WebkitOverflowScrolling: "touch",
+      margin: "0 -16px",
+      padding: "0 16px"
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse"
+    },
+    th: {
+      padding: "12px",
+      textAlign: "left",
+      fontSize: "12px",
+      fontWeight: "600",
+      color: "#6b7280",
+      textTransform: "uppercase",
+      borderBottom: "1px solid #e5e7eb",
+      backgroundColor: "#f9fafb"
+    },
+    tr: {
+      backgroundColor: "#ffffff",
+      transition: "background-color 0.2s ease"
+    },
+    confirmedRow: {
+      backgroundColor: "#f3f4f6"
+    },
+    td: {
+      padding: "16px 12px",
+      fontSize: "14px",
+      color: "#374151",
+      borderBottom: "1px solid #e5e7eb",
+      verticalAlign: "top"
+    },
+    detailContainer: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "4px"
+    },
+    detailText: {
+      margin: "0",
+      lineHeight: "1.4"
+    },
+    smallText: {
+      fontSize: "12px"
+    },
+    select: {
+      width: "100%",
+      padding: "10px 12px",
+      border: "1px solid #d1d5db",
+      borderRadius: "6px",
+      fontSize: "16px",
+      outline: "none",
+      transition: "all 0.2s ease",
+      backgroundColor: "white",
+      minHeight: "44px",
+      WebkitAppearance: "none"
+    },
+    confirmedBadge: {
+      display: "inline-flex",
+      padding: "4px 12px",
+      fontSize: "12px",
+      fontWeight: "600",
+      borderRadius: "9999px",
+      backgroundColor: "#dcfce7",
+      color: "#166534"
+    },
+    noOrders: {
+      padding: "32px 24px",
+      textAlign: "center",
+      fontSize: "14px",
+      color: "#6b7280"
+    },
+    paginationContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: "24px",
+      width: "100%"
+    },
+    pagination: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px"
+    },
+    paginationButton: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: "44px",
+      height: "44px",
+      padding: "0 12px",
+      border: "1px solid #d1d5db",
+      borderRadius: "8px",
+      backgroundColor: "#000",
+      color: "#ffffff",
+      fontSize: "16px",
+      fontWeight: "500",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      outline: "none",
+      WebkitTapHighlightColor: "transparent"
+    },
+    disabledButton: {
+      opacity: "0.5",
+      cursor: "not-allowed"
+    },
+    paginationIcon: {
+      width: "16px",
+      height: "16px"
+    },
+    pageText: {
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "#374151"
+    }
+  }
+
+  const mediaQueries = `
+    @media (min-width: 768px) {
+      .admin-orders {
+        padding: 24px;
+      }
+      
+      .admin-orders h2 {
+        text-align: left;
+        font-size: 28px;
+        margin-bottom: 24px;
+      }
+      
+      .admin-orders .header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      
+      .admin-orders .search-input {
+        max-width: 400px;
+        margin: 0;
+      }
+      
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .admin-table th,
+      .admin-table td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .admin-table th {
+        background-color: #f9fafb;
+        font-weight: 600;
+        font-size: 14px;
+        color: #4b5563;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      
+      .admin-table tr:last-child td {
+        border-bottom: none;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .admin-orders {
+        padding: 0;
+        margin-top: 16px;
+      }
+      
+      .admin-orders h2 {
+        font-size: 22px;
+        padding: 0 16px;
+        margin-bottom: 16px;
+      }
+      
+      .admin-orders .header {
+        padding: 0 16px;
+        margin-bottom: 16px;
+      }
+      
+      .admin-table {
+        display: block;
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .admin-table thead {
+        display: none;
+      }
+      
+      .admin-table tbody {
+        display: block;
+        width: 100%;
+      }
+      
+      .admin-table tr {
+        display: block;
+        margin: 0 16px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      
+      .admin-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border: none;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 15px;
+        position: relative;
+      }
+      
+      .admin-table td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      
+      .admin-table td:first-child {
+        padding-top: 0;
+      }
+      
+      .admin-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #4b5563;
+        margin-right: 16px;
+        flex: 1;
+        max-width: 40%;
+        word-break: break-word;
+      }
+      
+      .admin-table td > * {
+        flex: 1;
+        text-align: right;
+        max-width: 60%;
+        word-break: break-word;
+      }
+      
+      .pagination {
+        justify-content: center;
+        padding: 0 16px;
+        margin: 24px 0;
+      }
+      
+      .pagination button {
+        min-width: 44px;
+        height: 44px;
+        margin: 0 4px;
+      }
+      
+      .detailText {
+        text-align: right;
+        width: 100%;
+      }
+      
+      .smallText {
+        word-break: break-all;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .admin-orders h2 {
+        font-size: 20px;
+      }
+      
+      .admin-table tr {
+        padding: 12px;
+        margin: 0 12px 12px;
+      }
+      
+      .admin-table td {
+        font-size: 14px;
+        padding: 10px 0;
+      }
+      
+      .admin-table td::before {
+        font-size: 13px;
+        margin-right: 12px;
+      }
+      
+      .pagination button {
+        min-width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .admin-orders h2 {
+        font-size: 18px;
+        padding: 0 12px;
+      }
+      
+      .admin-orders .header {
+        padding: 0 12px;
+      }
+      
+      .admin-table tr {
+        padding: 10px;
+        margin: 0 8px 12px;
+      }
+      
+      .admin-table td {
+        font-size: 13px;
+        padding: 8px 0;
+      }
+      
+      .admin-table td::before {
+        font-size: 12px;
+        margin-right: 10px;
+      }
+    }
+  `;
+
   return (
     <div className="admin-orders" style={styles.container}>
-      <ToastContainer />
-      <style>{`
-        @media screen and (max-width: 768px) {
-          .admin-table thead {
-            display: none;
-          }
-          
-          .admin-table tr {
-            display: block;
-            border: 1px solid #e8e8e8;
-            border-radius: 12px;
-            padding: 20px 16px;
-            margin-bottom: 16px;
-            background: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          }
-          
-          .admin-table td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid #f0f0f0;
-            text-align: right;
-            font-size: 15px;
-            width: 100%;
-          }
-          
-          .admin-table td:last-child {
-            border-bottom: none;
-          }
-          
-          .admin-table td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: #333;
-            text-align: left;
-            flex: 1;
-            font-size: 14px;
-            margin-right: 16px;
-            padding-right: 10px;
-          }
-          
-          .admin-table td > * {
-            flex: 1;
-            text-align: right;
-            font-size: 15px;
-            padding-left: 10px;
-          }
-          
-          .mobile-pagination {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 6px;
-            padding: 12px 16px;
-            margin: 20px -8px 0 -8px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid #e9ecef;
-            overflow-x: auto;
-            min-height: 55px;
-            flex-wrap: nowrap;
-          }
-          
-          .mobile-pagination button {
-            min-width: 42px;
-            height: 42px;
-            font-size: 15px;
-            font-weight: 600;
-            flex-shrink: 0;
-            margin: 0;
-          }
-        }
-        
-        @media screen and (max-width: 480px) {
-          .admin-table tr {
-            padding: 18px 14px;
-            border-radius: 10px;
-          }
-          
-          .admin-table td {
-            font-size: 14px;
-            padding: 12px 0;
-          }
-          
-          .admin-table td::before {
-            font-size: 13px;
-            margin-right: 12px;
-            padding-right: 8px;
-          }
-          
-          .admin-table td > * {
-            font-size: 14px;
-            padding-left: 8px;
-          }
-        }
-        
-        @media screen and (max-width: 360px) {
-          .admin-table tr {
-            padding: 16px 12px;
-            border-radius: 8px;
-          }
-          
-          .admin-table td {
-            font-size: 13px;
-            padding: 10px 0;
-          }
-          
-          .admin-table td::before {
-            margin-right: 10px;
-            padding-right: 6px;
-          }
-          
-          .admin-table td > * {
-            font-size: 13px;
-            padding-left: 6px;
-          }
-        }
-      `}</style>
-      
+      <style>{mediaQueries}</style>
       <div style={styles.header}>
         <h2 style={styles.title}>Product Orders Details</h2>
         <div style={styles.searchContainer}>
@@ -289,9 +532,15 @@ const AdminUser = ({ updateTotalOrders }) => {
                   <td data-label="Sr. No" style={styles.td}>{index + 1}</td>
                   <td data-label="Product Details" style={styles.td}>
                     <div style={styles.detailContainer}>
-                      <p style={styles.detailText}><strong>Product Id:</strong> <span style={styles.smallText}>{order.items[0].productId}</span></p>
-                      <p style={styles.detailText}><strong>Size:</strong> {order.items[0].size}</p>
-                      <p style={styles.detailText}><strong>Quantity:</strong> {order.items[0].quantity}</p>
+                      {order.items.map((item, itemIndex) => (
+                        <div key={itemIndex} style={{ marginBottom: '10px', padding: '8px', borderBottom: '1px solid #eee' }}>
+                          <p style={styles.detailText}><strong>Product ID:</strong> {item.productId?._id || 'N/A'}</p>
+                          {item.productId?.name && <p style={styles.detailText}><strong>Name:</strong> {item.productId.name}</p>}
+                          <p style={styles.detailText}><strong>Size:</strong> {item.size || 'N/A'}</p>
+                          <p style={styles.detailText}><strong>Qty:</strong> {item.quantity || '0'}</p>
+                          <p style={styles.detailText}><strong>Price:</strong> ₹{item.price || '0'}</p>
+                        </div>
+                      ))}
                     </div>
                   </td>
                   <td data-label="User Details" style={styles.td}>
@@ -374,254 +623,7 @@ const AdminUser = ({ updateTotalOrders }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const styles = {
-  container: {
-    padding: "24px",
-    maxWidth: "1400px",
-    margin: "0 auto",
-    marginTop: "28px"
-  },
-  header: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "stretch",
-    gap: "16px",
-    marginBottom: "24px"
-  },
-  title: {
-    fontSize: "28px",
-    fontWeight: "bold",
-    textAlign: "left",
-    color: "#000",
-    margin: 0
-  },
-  searchContainer: {
-    display: "flex",
-    justifyContent: "left"
-  },
-  searchInput: {
-    width: "100%",
-    maxWidth: "320px",
-    padding: "12px 16px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    fontSize: "14px",
-    outline: "none",
-    transition: "all 0.3s ease"
-  },
-  tableContainer: {
-    borderRadius: "8px",
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    overflow: "hidden"
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse"
-  },
-  th: {
-    padding: "12px",
-    textAlign: "left",
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#6b7280",
-    textTransform: "uppercase",
-    borderBottom: "1px solid #e5e7eb",
-    backgroundColor: "#f9fafb"
-  },
-  tr: {
-    backgroundColor: "#ffffff",
-    transition: "background-color 0.2s ease"
-  },
-  confirmedRow: {
-    backgroundColor: "#f3f4f6"
-  },
-  td: {
-    padding: "16px 12px",
-    fontSize: "14px",
-    color: "#374151",
-    borderBottom: "1px solid #e5e7eb",
-    verticalAlign: "top"
-  },
-  detailContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px"
-  },
-  detailText: {
-    margin: "0",
-    lineHeight: "1.4"
-  },
-  smallText: {
-    fontSize: "12px"
-  },
-  select: {
-    width: "100%",
-    padding: "6px 8px",
-    border: "1px solid #d1d5db",
-    borderRadius: "4px",
-    fontSize: "14px",
-    outline: "none",
-    transition: "border-color 0.2s ease"
-  },
-  confirmedBadge: {
-    display: "inline-flex",
-    padding: "4px 12px",
-    fontSize: "12px",
-    fontWeight: "600",
-    borderRadius: "9999px",
-    backgroundColor: "#dcfce7",
-    color: "#166534"
-  },
-  noOrders: {
-    padding: "32px 24px",
-    textAlign: "center",
-    fontSize: "14px",
-    color: "#6b7280"
-  },
-  paginationContainer: {
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginTop: "24px"
-  },
-  pagination: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px"
-  },
-  paginationButton: {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "40px",
-    height: "40px",
-    border: "1px solid #d1d5db",
-    borderRadius: "6px",
-    backgroundColor: "#000",
-    color: "#ffffff",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    outline: "none"
-  },
-  disabledButton: {
-    opacity: "0.5",
-    cursor: "not-allowed"
-  },
-  paginationIcon: {
-    width: "16px",
-    height: "16px"
-  },
-  pageText: {
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#374151"
-  }
-}
-
-// Add media queries for responsive design
-const mediaQueries = `
-  @media (min-width: 768px) {
-    .admin-orders {
-      padding: 32px;
-    }
-    
-    .admin-orders h2 {
-      text-align: left;
-      font-size: 32px;
-    }
-    
-    .admin-orders .header {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .admin-orders .search-input {
-      max-width: 400px;
-    }
-    
-    .admin-table th,
-    .admin-table td {
-      padding: 20px 16px;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .admin-orders {
-      padding: 16px;
-    }
-    
-    .admin-table {
-      display: block;
-      overflow-x: auto;
-    }
-    
-    .admin-table thead {
-      display: none;
-    }
-    
-    .admin-table tr {
-      display: block;
-      margin-bottom: 16px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 16px;
-    }
-    
-    .admin-table td {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .admin-table td:last-child {
-      border-bottom: none;
-    }
-    
-    .admin-table td::before {
-      content: attr(data-label);
-      font-weight: 600;
-      color: #374151;
-      text-align: left;
-      flex: 1;
-    }
-    
-    .admin-table td > * {
-      flex: 1;
-      text-align: right;
-    }
-    
-    .pagination {
-      justify-content: center;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .admin-orders {
-      padding: 12px;
-    }
-    
-    .admin-orders h2 {
-      font-size: 24px;
-    }
-    
-    .admin-table tr {
-      padding: 12px;
-    }
-    
-    .admin-table td {
-      font-size: 14px;
-      padding: 10px 0;
-    }
-  }
-`
-
-export default AdminUser
+export default AdminUser;
