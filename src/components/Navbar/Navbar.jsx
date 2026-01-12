@@ -1068,19 +1068,22 @@ const Navbar = () => {
                     backgroundColor: "#fff",
                     borderRadius: "12px",
                     padding: "16px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    transition: "all 0.3s ease",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08)",
+                    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                     cursor: "pointer",
                     position: "relative",
-                    overflow: "hidden"
+                    overflow: "hidden",
+                    border: "1px solid rgba(229, 231, 235, 0.8)"
                   }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.transform = "translateY(-6px)";
-                      e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.12)";
+                      e.currentTarget.style.transform = "translateY(-6px) scale(1.02)";
+                      e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.1)";
+                      e.currentTarget.style.borderColor = "rgba(217, 119, 6, 0.3)";
                     }}
                     onMouseOut={(e) => {
                       e.currentTarget.style.transform = "none";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                      e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08)";
+                      e.currentTarget.style.borderColor = "rgba(229, 231, 235, 0.8)";
                     }}
                     onClick={() => handleProductClick(product._id)}
                   >
@@ -1096,11 +1099,12 @@ const Navbar = () => {
 
                     <div style={{
                       width: "100%",
-                      height: "220px",
-                      borderRadius: "8px",
+                      height: "180px",
+                      borderRadius: "10px",
                       overflow: "hidden",
-                      marginBottom: "14px",
-                      position: "relative"
+                      marginBottom: "12px",
+                      position: "relative",
+                      background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)"
                     }}>
                       <img
                         src={getProductImage(product)}
@@ -1109,10 +1113,10 @@ const Navbar = () => {
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
-                          transition: "transform 0.3s ease"
+                          transition: "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                         }}
                         onMouseOver={(e) => {
-                          e.target.style.transform = "scale(1.05)";
+                          e.target.style.transform = "scale(1.08)";
                         }}
                         onMouseOut={(e) => {
                           e.target.style.transform = "scale(1)";
@@ -1121,58 +1125,82 @@ const Navbar = () => {
                           e.target.src = "/placeholder-image.jpg"
                         }}
                       />
-                      {/* Discount Badge */}
+                      {/* Enhanced Discount Badge */}
                       {priceInfo.hasDiscount && (
                         <div
                           style={{
                             position: "absolute",
-                            top: "8px",
-                            left: "8px",
-                            backgroundColor: priceInfo.isSpecialOffer ? "#16a34a" : "#dc2626",
+                            top: "10px",
+                            left: "10px",
+                            background: priceInfo.isSpecialOffer 
+                              ? "linear-gradient(135deg, #16a34a 0%, #15803d 100%)" 
+                              : "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
                             color: "white",
-                            padding: "4px 8px",
-                            borderRadius: "12px",
+                            padding: "6px 12px",
+                            borderRadius: "20px",
                             fontSize: "11px",
-                            fontWeight: "bold",
+                            fontWeight: "700",
                             zIndex: 3,
                             display: "flex",
                             alignItems: "center",
-                            gap: "4px"
+                            gap: "4px",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px"
                           }}
                         >
-                          {priceInfo.isSpecialOffer && <span>Special Offer</span>}
+                          {priceInfo.isSpecialOffer && <span>✨</span>}
                           <span>{priceInfo.discountPercent}% OFF</span>
                         </div>
                       )}
                     </div>
 
                     <h3 style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      margin: "0 0 8px 0",
-                      color: "#1f2937",
-                      lineHeight: "1.4",
-                      height: "44px",
+                      fontSize: "15px",
+                      fontWeight: "700",
+                      margin: "0 0 6px 0",
+                      color: "#111827",
+                      lineHeight: "1.2",
+                      height: "36px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: "2",
+                      WebkitBoxOrient: "vertical",
+                      letterSpacing: "-0.1px"
+                    }}>
+                      {product.name}
+                    </h3>
+
+                    <p style={{
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      margin: "0 0 10px 0",
+                      lineHeight: "1.3",
+                      height: "32px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       display: "-webkit-box",
                       WebkitLineClamp: "2",
                       WebkitBoxOrient: "vertical"
                     }}>
-                      {product.name}
-                    </h3>
+                      {product.description || "No description available"}
+                    </p>
 
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: "8px"
+                      gap: "8px",
+                      paddingTop: "6px",
+                      borderTop: "1px solid rgba(229, 231, 235, 0.6)"
                     }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                         <p style={{
                           fontSize: "18px",
-                          fontWeight: "700",
-                          color: "#1f2937",
-                          margin: "0"
+                          fontWeight: "800",
+                          color: "#111827",
+                          margin: "0",
+                          letterSpacing: "-0.3px"
                         }}>
                           ₹{priceInfo.currentPrice}
                         </p>
@@ -1180,33 +1208,44 @@ const Navbar = () => {
                           <span style={{
                             fontSize: "13px",
                             fontWeight: 500,
-                            color: "#6b7280",
-                            textDecoration: 'line-through'
+                            color: "#9ca3af",
+                            textDecoration: 'line-through',
+                            position: "relative"
                           }}>₹{priceInfo.oldPrice}</span>
                         )}
                       </div>
 
-                      {/* Savings and countdown info */}
+                      {/* Enhanced Savings and countdown info */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         {priceInfo.hasDiscount && (
                           <span style={{
                             fontSize: "11px",
-                            color: "#16a34a",
-                            fontWeight: "600"
+                            color: "#059669",
+                            fontWeight: "700",
+                            background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
+                            padding: "3px 6px",
+                            borderRadius: "6px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "3px"
                           }}>
-                            You save ₹{priceInfo.oldPrice - priceInfo.currentPrice}
+                            💰 Save ₹{priceInfo.oldPrice - priceInfo.currentPrice}
                           </span>
                         )}
                         {offerActive && countdown && (
                           <span style={{
-                            border: '1px solid #16a34a',
-                            color: '#16a34a',
-                            padding: '2px 6px',
-                            borderRadius: 9999,
-                            fontWeight: 600,
+                            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                            color: '#92400e',
+                            padding: '3px 6px',
+                            borderRadius: '6px',
+                            fontWeight: 700,
                             fontSize: '10px',
-                            whiteSpace: 'nowrap'
-                          }}>{countdown}</span>
+                            whiteSpace: 'nowrap',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "3px"
+                          }}>⏰ {countdown}</span>
                         )}
                       </div>
                     </div>

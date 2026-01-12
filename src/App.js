@@ -36,7 +36,7 @@ setupAxios()
 const ConditionalNavbar = () => {
   const location = useLocation()
   // ✅ Navbar hidden only on admin and profile
-  const excludeNavbarRoutes = ["/admin", "/profile", "/login", "/signup", "/forgot-password", "/reset-password"]
+  const excludeNavbarRoutes = ["/admin", "/profile", "/login", "/signup", "/forgot-password", "/forgotPassword", "/reset-password"]
   return !excludeNavbarRoutes.includes(location.pathname) ? <Navbar /> : null
 }
 
@@ -72,6 +72,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<LoginSignup />} />
               <Route path="/forgotPassword/:id/:token" element={<ForgotPassword />} />
+              <Route path="/forgot-password/:id/:token" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<PasswordReset />} />
               <Route path="/filter" element={<FilterProduct />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />

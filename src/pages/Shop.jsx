@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { useCategoryContext } from '../context/CategoryContext';
 import Hero from '../components/Hero/Hero';
@@ -10,6 +10,7 @@ import WomenBanner from './WomenBanner';
 import { Heart } from 'lucide-react';
 
 const Shop = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { all_products } = useContext(ShopContext);
   const { 

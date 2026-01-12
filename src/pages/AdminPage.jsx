@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useContext, useEffect } from "react"
@@ -36,6 +35,8 @@ import {
   faMedal ,
   faListAlt,
   faBell,
+  faTimes,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons"
 import AdminUser from "./AdminUser"
 import ShippedOrders from "./ConfirmedOrders"
@@ -55,12 +56,21 @@ const Dashboard = () => {
   const [totalOrders, setTotalOrders] = useState(0)
   const [confirmedOrdersCount, setConfirmedOrdersCount] = useState(0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
+  const [newOrdersCount, setNewOrdersCount] = useState(0)
   const [lowStockProducts, setLowStockProducts] = useState([])
   const [totalSales, setTotalSales] = useState(() => {
     const storedTotalSales = localStorage.getItem("totalSales")
     return storedTotalSales ? Number.parseFloat(storedTotalSales) : 0
   })
   const [isMobile, setIsMobile] = useState(false)
+  const [showDetailedView, setShowDetailedView] = useState(false)
+  const [detailedViewType, setDetailedViewType] = useState("")
+  const [allProducts, setAllProducts] = useState([])
+  const [allOrders, setAllOrders] = useState([])
+  const [confirmedOrders, setConfirmedOrders] = useState([])
+  const [pendingOrders, setPendingOrders] = useState([])
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [showOrderModal, setShowOrderModal] = useState(false)
 
   // Check screen size
   useEffect(() => {
@@ -105,6 +115,10 @@ const Dashboard = () => {
     setPendingOrdersCount(count)
   }
 
+  const updateNewOrdersCount = (count) => {
+    setNewOrdersCount(count)
+  }
+
   const updateLowStockProducts = (products) => {
     setLowStockProducts(products)
   }
@@ -117,6 +131,56 @@ const Dashboard = () => {
   const handleLogoutClick = () => {
     logout()
     navigate("/login")
+  }
+
+  const handleCardClick = async (type) => {
+    setDetailedViewType(type)
+    setShowDetailedView(true)
+    
+    try {
+      if (type === "Products") {
+        const response = await axios.get("https://api.silksew.com/api/products", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setAllProducts(Array.isArray(response.data) ? response.data : response.data.products || [])
+      } else if (type === "Orders") {
+        const response = await axios.get("https://api.silksew.com/api/orders", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const ordersData = Array.isArray(response.data) ? response.data : response.data.orders || []
+        setAllOrders(ordersData)
+      } else if (type === "Confirmed") {
+        const response = await axios.get("https://api.silksew.com/api/orders", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const ordersData = Array.isArray(response.data) ? response.data : response.data.orders || []
+        setConfirmedOrders(ordersData.filter(order => order.status === "Confirmed"))
+      } else if (type === "Pending") {
+        const response = await axios.get("https://api.silksew.com/api/orders", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const ordersData = Array.isArray(response.data) ? response.data : response.data.orders || []
+        setPendingOrders(ordersData.filter(order => order.status === "Pending"))
+      }
+    } catch (error) {
+      console.error("Error fetching detailed data:", error)
+      toast.error("Failed to fetch data. Please try again.")
+    }
+  }
+
+  const closeDetailedView = () => {
+    setShowDetailedView(false)
+    setDetailedViewType("")
+  }
+
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order)
+    setShowOrderModal(true)
+  }
+
+  const closeOrderModal = () => {
+    setShowOrderModal(false)
+    setSelectedOrder(null)
   }
 
   const fetchInitialCounts = async () => {
@@ -153,7 +217,7 @@ const Dashboard = () => {
           let confirmedCount = 0
           let pendingCount = 0
           ordersData.forEach((order) => {
-            if (order.status === "ConfirmedOrder") {
+            if (order.status === "Confirmed") {
               totalSales += order.totalAmount || 0
               confirmedCount++
             } else {
@@ -163,6 +227,7 @@ const Dashboard = () => {
           updateTotalSales(totalSales)
           setConfirmedOrdersCount(confirmedCount)
           setPendingOrdersCount(pendingCount)
+          setNewOrdersCount(pendingCount) // New orders are the same as pending orders
         } catch (orderError) {
           console.error("Error fetching orders:", orderError.message)
           toast.error("Failed to fetch orders. Please check if the server is running.")
@@ -406,7 +471,7 @@ const Dashboard = () => {
                 },
                 { key: "AddProduct", icon: faPlus, label: "Add Product" },
                 { key: "ListProducts", icon: faList, label: "Product List" },
-                { key: "Orders", icon: faShoppingCart, label: "Orders" },
+                { key: "Orders", icon: faShoppingCart, label: "Orders", notification: newOrdersCount },
                 // { key: "ReturnRequest", icon: faUndo, label: "Return Requests" },
                 // { key: "ShippedOrders", icon: faCheck, label: "Confirmed Orders" },
                 // { key: "ConfirmedOrder", icon: faTruck, label: "Shipped Orders" },
@@ -577,6 +642,7 @@ const Dashboard = () => {
                   {pieChartData.map((item, index) => (
                     <div
                       key={index}
+                      onClick={item.name !== "Sales" ? () => handleCardClick(item.name) : undefined}
                       style={{
                         backgroundColor: "white",
                         borderRadius: "12px",
@@ -584,7 +650,7 @@ const Dashboard = () => {
                         border: "1px solid #e2e8f0",
                         padding: "15px",
                         transition: "all 0.3s ease",
-                        cursor: "pointer",
+                        cursor: item.name !== "Sales" ? "pointer" : "default",
                         textAlign: "center",
                         minHeight: "100px",
                         display: "flex",
@@ -592,13 +658,13 @@ const Dashboard = () => {
                         justifyContent: "center",
                       }}
                       onMouseEnter={(e) => {
-                        if (!isMobile) {
+                        if (!isMobile && item.name !== "Sales") {
                           e.currentTarget.style.transform = "translateY(-3px)"
                           e.currentTarget.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.12)"
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (!isMobile) {
+                        if (!isMobile && item.name !== "Sales") {
                           e.currentTarget.style.transform = "translateY(0)"
                           e.currentTarget.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.05)"
                         }
@@ -644,12 +710,188 @@ const Dashboard = () => {
                         }}
                       >
                         {item.name === "Sales"
-                          ? `₹${totalSales.toLocaleString()}`
+                          ? `₹${totalSales.toLocaleString()}` // Changed this line
                           : item.value.toLocaleString()}
                       </p>
                     </div>
                   ))}
                 </div>
+
+            
+
+                {/* Inline Table Section */}
+                {showDetailedView && (
+                  <div
+                    style={{
+                      backgroundColor: "white",
+                      borderRadius: "15px",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+                      border: "1px solid #e2e8f0",
+                      padding: "25px",
+                      marginBottom: "30px",
+                    }}
+                  >
+                    {/* Table Header */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "20px",
+                        paddingBottom: "15px",
+                        borderBottom: "1px solid #e5e7eb",
+                      }}
+                    >
+                      <h2
+                        style={{
+                          margin: 0,
+                          fontSize: "1.3rem",
+                          fontWeight: "bold",
+                          color: "#1e293b",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <FontAwesomeIcon 
+                          icon={
+                            detailedViewType === "Products" ? faBox :
+                            detailedViewType === "Orders" ? faShoppingCart :
+                            detailedViewType === "Confirmed" ? faCheckCircle :
+                            faClock
+                          } 
+                          style={{ color: detailedViewType === "Products" ? "#4F46E5" : detailedViewType === "Orders" ? "#059669" : detailedViewType === "Confirmed" ? "#D97706" : "#8B5CF6" }} 
+                        />
+                        {detailedViewType} Details
+                      </h2>
+                      <button
+                        onClick={closeDetailedView}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          fontSize: "1.2rem",
+                          cursor: "pointer",
+                          color: "#6b7280",
+                          padding: "8px",
+                          borderRadius: "6px",
+                          transition: "all 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#f3f4f6"
+                          e.currentTarget.style.color = "#dc2626"
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent"
+                          e.currentTarget.style.color = "#6b7280"
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faTimes} />
+                      </button>
+                    </div>
+
+                    {/* Table Content */}
+                    <div style={{ overflowX: "auto" }}>
+                      {detailedViewType === "Products" && (
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+                          <thead>
+                            <tr style={{ backgroundColor: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>ID</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Name</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Category</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Price</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Stock</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {allProducts.map((product, index) => (
+                              <tr key={product._id || index} style={{ borderBottom: "1px solid #e5e7eb", backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb" }}>
+                                <td style={{ padding: "12px", color: "#374151" }}>{product._id?.slice(-6) || index}</td>
+                                <td style={{ padding: "12px", color: "#374151", fontWeight: "500" }}>{product.name}</td>
+                                <td style={{ padding: "12px", color: "#374151" }}>{product.category}</td>
+                                <td style={{ padding: "12px", color: "#374151" }}>₹{product.new_price}</td>
+                                <td style={{ padding: "12px", color: "#374151" }}>{product.availableStock}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+
+                      {(detailedViewType === "Orders" || detailedViewType === "Confirmed" || detailedViewType === "Pending") && (
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+                          <thead>
+                            <tr style={{ backgroundColor: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Order ID</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Customer</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Date</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Amount</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Status</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>Payment</th>
+                              <th style={{ padding: "12px", textAlign: "left", fontWeight: "600", color: "#374151" }}>View</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(detailedViewType === "Orders" ? allOrders : detailedViewType === "Confirmed" ? confirmedOrders : pendingOrders).map((order, index) => (
+                              <tr key={order._id || index} style={{ borderBottom: "1px solid #e5e7eb", backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb" }}>
+                                <td style={{ padding: "12px", color: "#374151" }}>{order._id?.slice(-6) || index}</td>
+                                <td style={{ padding: "12px", color: "#374151", fontWeight: "500" }}>
+                                  {order.address?.firstName} {order.address?.lastName}
+                                </td>
+                                <td style={{ padding: "12px", color: "#374151" }}>
+                                  {new Date(order.date || order.createdAt).toLocaleDateString()}
+                                </td>
+                                <td style={{ padding: "12px", color: "#374151" }}>₹{order.totalAmount}</td>
+                                <td style={{ padding: "12px" }}>
+                                  <span
+                                    style={{
+                                      padding: "4px 8px",
+                                      borderRadius: "4px",
+                                      fontSize: "12px",
+                                      fontWeight: "600",
+                                      backgroundColor: order.status === "Confirmed" ? "#dcfce7" : "#fef3c7",
+                                      color: order.status === "Confirmed" ? "#166534" : "#92400e",
+                                    }}
+                                  >
+                                    {order.status}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "12px" }}>
+                                  <span
+                                    style={{
+                                      padding: "4px 8px",
+                                      borderRadius: "4px",
+                                      fontSize: "12px",
+                                      fontWeight: "600",
+                                      backgroundColor: order.paymentMethod === "Razorpay" ? "#dcfce7" : "#e0f2fe",
+                                      color: order.paymentMethod === "Razorpay" ? "#166534" : "#0c4a6e",
+                                    }}
+                                  >
+                                    {order.paymentMethod === "Razorpay" ? "Online Paid" : "COD"}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "12px" }}>
+                                  <button
+                                    onClick={() => handleViewOrder(order)}
+                                    style={{
+                                      padding: "6px 12px",
+                                      backgroundColor: "#4F46E5",
+                                      color: "white",
+                                      border: "none",
+                                      borderRadius: "4px",
+                                      cursor: "pointer",
+                                      fontSize: "12px",
+                                    }}
+                                  >
+                                    View
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Chart Section */}
                 <div
@@ -731,6 +973,7 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                   </div>
                 </div>
+
               </div>
             </div>
           )}
@@ -742,7 +985,7 @@ const Dashboard = () => {
               updateLowStockProducts={updateLowStockProducts}
             />
           )}
-          {selectedOption === "Orders" && <AdminUser updateTotalOrders={updateTotalOrders} />}
+          {selectedOption === "Orders" && <AdminUser updateTotalOrders={updateTotalOrders} updateNewOrdersCount={updateNewOrdersCount} />}
           {selectedOption === "complaints" && <AdminComplaints updateTotalOrders={updateTotalOrders} />}
           {selectedOption === "ConfirmedOrder" && (
             <ConfirmedOrder
@@ -776,13 +1019,272 @@ const Dashboard = () => {
           )}
         </div>
       </div>
-      <ToastContainer />
-      <style jsx>{`
-        @keyframes spin {
-          100% { transform: rotate(360deg); }
-        }
 
-        /* Enhanced scrollbar styling */
+      {/* Order Details Modal */}
+      {showOrderModal && selectedOrder && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(5px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={closeOrderModal}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "12px",
+              padding: "30px",
+              maxWidth: "600px",
+              width: "90%",
+              maxHeight: "80vh",
+              overflowY: "auto",
+              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+                paddingBottom: "15px",
+                borderBottom: "1px solid #e5e7eb",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: "1.3rem",
+                  fontWeight: "bold",
+                  color: "#1e2937",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <FontAwesomeIcon icon={faEye} style={{ color: "#4F46E5" }} />
+                Order Details
+              </h3>
+              <button
+                onClick={closeOrderModal}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                  color: "#6b7280",
+                  padding: "5px",
+                  borderRadius: "4px",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#dc2626"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#6b7280"
+                }}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+
+            {/* Order Information */}
+            <div style={{ marginBottom: "20px" }}>
+              <h4 style={{ margin: "0 0 10px 0", color: "#374151", fontWeight: "600" }}>Order Information</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "14px" }}>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Order ID:</span>
+                  <p style={{ margin: "2px 0", color: "#374151", fontWeight: "600" }}>{selectedOrder._id?.slice(-8).toUpperCase() || "N/A"}</p>
+                </div>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Order Date:</span>
+                  <p style={{ margin: "2px 0", color: "#374151" }}>{new Date(selectedOrder.date || selectedOrder.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Order Status:</span>
+                  <p style={{ margin: "2px 0" }}>
+                    <span
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        backgroundColor: selectedOrder.status === "Confirmed" ? "#dcfce7" : selectedOrder.status === "Pending" ? "#fef3c7" : "#fee2e2",
+                        color: selectedOrder.status === "Confirmed" ? "#166534" : selectedOrder.status === "Pending" ? "#92400e" : "#991b1b",
+                      }}
+                    >
+                      {selectedOrder.status || "Pending"}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Payment Method:</span>
+                  <p style={{ margin: "2px 0" }}>
+                    <span
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        backgroundColor: selectedOrder.paymentMethod === "Razorpay" ? "#dcfce7" : "#e0f2fe",
+                        color: selectedOrder.paymentMethod === "Razorpay" ? "#166534" : "#0c4a6e",
+                      }}
+                    >
+                      {selectedOrder.paymentMethod === "Razorpay" ? "Online Paid" : "COD"}
+                    </span>
+                  </p>
+                </div>
+                {/* <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Payment Status:</span>
+                  <p style={{ margin: "2px 0" }}>
+                    <span
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        backgroundColor: selectedOrder.paymentStatus === "Paid" ? "#dcfce7" : "#fef3c7",
+                        color: selectedOrder.paymentStatus === "Paid" ? "#166534" : "#92400e",
+                      }}
+                    >
+                      {selectedOrder.paymentStatus || "Pending"}
+                    </span>
+                  </p>
+                </div> */}
+              </div>
+            </div>
+
+            {/* Processing Stage */}
+            <div style={{ marginBottom: "20px" }}>
+              <h4 style={{ margin: "0 0 10px 0", color: "#374151", fontWeight: "600" }}>Processing Stage</h4>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                {["Order Placed", "Confirmed", "Processing", "Shipped", "Delivered"].map((stage, index) => {
+                  const isCompleted = selectedOrder.status === "Confirmed" && index <= 1 || 
+                                     selectedOrder.status === "Processing" && index <= 2 ||
+                                     selectedOrder.status === "Shipped" && index <= 3 ||
+                                     selectedOrder.status === "Delivered" && index <= 4;
+                  const isCurrent = selectedOrder.status === stage.replace(" ", "");
+                  
+                  return (
+                    <div key={index} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <div
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "50%",
+                          backgroundColor: isCompleted ? "#4F46E5" : "#e5e7eb",
+                          color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          border: isCurrent ? "2px solid #4F46E5" : "none",
+                        }}
+                      >
+                        {isCompleted ? "✓" : index + 1}
+                      </div>
+                      {index < 4 && (
+                        <div
+                          style={{
+                            width: "30px",
+                            height: "2px",
+                            backgroundColor: isCompleted ? "#4F46E5" : "#e5e7eb",
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p style={{ marginTop: "8px", fontSize: "12px", color: "#6b7280" }}>
+                Current Stage: <span style={{ fontWeight: "600", color: "#374151" }}>
+                  {selectedOrder.status === "Confirmed" ? "Order Confirmed" :
+                   selectedOrder.status === "Processing" ? "Being Processed" :
+                   selectedOrder.status === "Shipped" ? "Out for Delivery" :
+                   selectedOrder.status === "Delivered" ? "Order Delivered" :
+                   "Order Pending"}
+                </span>
+              </p>
+            </div>
+
+            {/* Customer Information */}
+            <div style={{ marginBottom: "20px" }}>
+              <h4 style={{ margin: "0 0 10px 0", color: "#374151", fontWeight: "600" }}>Customer Information</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "14px" }}>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Name:</span>
+                  <p style={{ margin: "2px 0", color: "#374151" }}>
+                    {selectedOrder.address?.firstName} {selectedOrder.address?.lastName}
+                  </p>
+                </div>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Email:</span>
+                  <p style={{ margin: "2px 0", color: "#374151" }}>{selectedOrder.email || "N/A"}</p>
+                </div>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Phone:</span>
+                  <p style={{ margin: "2px 0", color: "#374151" }}>{selectedOrder.phone || selectedOrder.address?.phone || "N/A"}</p>
+                </div>
+                <div>
+                  <span style={{ color: "#6b7280", fontWeight: "500" }}>Address:</span>
+                  <p style={{ margin: "2px 0", color: "#374151" }}>
+                    {selectedOrder.address?.street}, {selectedOrder.address?.city}, {selectedOrder.address?.state} - {selectedOrder.address?.pinCode}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Items */}
+            <div style={{ marginBottom: "20px" }}>
+              <h4 style={{ margin: "0 0 10px 0", color: "#374151", fontWeight: "600" }}>Order Items</h4>
+              {selectedOrder.items && selectedOrder.items.map((item, index) => (
+                <div key={index} style={{ 
+                  display: "flex", 
+                  justifyContent: "space-between", 
+                  alignItems: "center",
+                  padding: "12px", 
+                  backgroundColor: "#f9fafb", 
+                  borderRadius: "8px", 
+                  marginBottom: "8px",
+                  border: "1px solid #e5e7eb"
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: "600", color: "#374151", marginBottom: "4px" }}>{item.name}</div>
+                    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                      Size: {item.size || "N/A"} | Color: {item.color || "N/A"} | Category: {item.category || "N/A"}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "2px" }}>
+                      Price: ₹{item.price} × {item.quantity}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontWeight: "600", color: "#374151" }}>₹{item.price * item.quantity}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "15px", borderTop: "2px solid #e5e7eb" }}>
+              <span style={{ fontWeight: "600", color: "#1f2937" }}>Total Amount:</span>
+              <span style={{ fontWeight: "bold", color: "#1f2937", fontSize: "1.1rem" }}>₹{selectedOrder.totalAmount}</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <style>{`
         .sidebar::-webkit-scrollbar {
           width: 6px;
         }

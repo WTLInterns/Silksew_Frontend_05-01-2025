@@ -2,6 +2,7 @@
 import { useContext, useState } from "react";
 import "./CartItems.css";
 import { ShopContext } from "../../context/ShopContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -11,10 +12,10 @@ const CartItems = () => {
     removeFromCart,
     getTotalCartAmount,
     products,
-    token,
     loading,
     cartLoading,
   } = useContext(ShopContext);
+  const { token } = useContext(AuthContext);
 
   const [offerCode, setOfferCode] = useState("");
   const navigate = useNavigate();
@@ -83,6 +84,7 @@ const CartItems = () => {
 
   return (
     <div className="cartitems">
+      {/* Desktop Header - Hidden on Mobile */}
       <div className="cartitems-header">
         <p>Product</p>
         <p>Title</p>
@@ -113,18 +115,54 @@ const CartItems = () => {
             key={`${productId}-${size}-${color}`}
             className="cartitem"
           >
-            <img src={imageUrl} alt={product.name} />
-            <p>{product.name}</p>
-            <p>Rs {product.price}</p>
-            <p>{displayColor}</p>
-            <p>{quantity}</p>
-            <p>{size}</p>
-            <p>Rs {quantity * product.price}</p>
-            <button
-              onClick={() => removeFromCart(productId, size, color)}
-            >
-              Remove
-            </button>
+            {/* Mobile Card Layout */}
+            <div className="cartitem-product-info">
+              <img src={imageUrl} alt={product.name} />
+              <div className="cartitem-product-details">
+                <p className="product-name">{product.name}</p>
+                <p className="product-price">Rs {product.price}</p>
+              </div>
+            </div>
+
+            <div className="cartitem-options">
+              <div className="cartitem-option">
+                <span className="cartitem-option-label">Color</span>
+                <span className="cartitem-option-value">{displayColor}</span>
+              </div>
+              <div className="cartitem-option">
+                <span className="cartitem-option-label">Size</span>
+                <span className="cartitem-option-value">{size}</span>
+              </div>
+            </div>
+
+            <div className="cartitem-actions">
+              <div className="cartitem-quantity">
+                <span className="cartitem-quantity-label">Qty:</span>
+                <span className="cartitem-quantity-value">{quantity}</span>
+              </div>
+              <div className="cartitem-total">Rs {quantity * product.price}</div>
+              <button
+                onClick={() => removeFromCart(productId, size, color)}
+              >
+                Remove
+              </button>
+            </div>
+
+            {/* Desktop Table Layout - Hidden on Mobile */}
+            <div className="desktop-layout">
+              <img src={imageUrl} alt={product.name} />
+              <p>{product.name}</p>
+              <p>Rs {product.price}</p>
+              <p>{displayColor}</p>
+              <p>{quantity}</p>
+              <p>{size}</p>
+              <p>Rs {quantity * product.price}</p>
+              <button
+                onClick={() => removeFromCart(productId, size, color)}
+              >
+                Remove
+              </button>
+            </div>
           </div>
         );
       })}

@@ -11,7 +11,11 @@ const delivery_fee = 0
 export const ShopContext = createContext(null)
 
 const ShopContextProvider = (props) => {
-  const [cartItems, setCartItems] = useState([])
+  const [cartItems, setCartItems] = useState(() => {
+    // Load cart from localStorage on initial render
+    const savedCart = localStorage.getItem("cartItems")
+    return savedCart ? JSON.parse(savedCart) : []
+  })
   const [searchTerm, setSearchTerm] = useState("")
   const [products, setProducts] = useState([])
   const [token, setToken] = useState("")
@@ -30,17 +34,17 @@ const ShopContextProvider = (props) => {
           console.error("Token has expired.")
           localStorage.removeItem("token")
           setToken("")
-          setCartItems([])
+          // Don't clear cart items when token expires, keep local cart
         }
       } catch (error) {
         console.error("Failed to decode token:", error)
         localStorage.removeItem("token")
         setToken("")
-        setCartItems([])
+        // Don't clear cart items when token is invalid, keep local cart
       }
     } else {
       setToken("")
-      setCartItems([])
+      // Don't clear cart items when no token, keep local cart
     }
     setLoading(false)
   }, [])
@@ -71,20 +75,45 @@ const ShopContextProvider = (props) => {
           headers: { Authorization: `Bearer ${token}` },
         })
         const serverCartItems = Array.isArray(response.data.items) ? response.data.items : []
-        setCartItems(serverCartItems)
+        
+        // Get local cart items
+        const localCartItems = JSON.parse(localStorage.getItem("cartItems") || "[]")
+        
+        // Merge server and local cart items (server takes precedence for duplicates)
+        const mergedCart = [...localCartItems]
+        serverCartItems.forEach(serverItem => {
+          const existingIndex = mergedCart.findIndex(
+            localItem => localItem.productId === serverItem.productId && 
+                       localItem.size === serverItem.size && 
+                       localItem.color === serverItem.color
+          )
+          if (existingIndex > -1) {
+            // Update quantity from server
+            mergedCart[existingIndex].quantity = serverItem.quantity
+          } else {
+            // Add server item to local cart
+            mergedCart.push(serverItem)
+          }
+        })
+        
+        setCartItems(mergedCart)
       } catch (error) {
         console.error("Failed to fetch cart items:", error.message)
-        setCartItems([])
+        // Keep local cart items if server fetch fails
+        const localCartItems = JSON.parse(localStorage.getItem("cartItems") || "[]")
+        setCartItems(localCartItems)
       }
     } else {
-      setCartItems([])
+      // No token, use local cart items
+      const localCartItems = JSON.parse(localStorage.getItem("cartItems") || "[]")
+      setCartItems(localCartItems)
     }
     setCartLoading(false)
   }, [token])
 
   const addToCart = useCallback(
-    async (productId, size, color) => {
-      const newItem = { productId, size, color, quantity: 1 }
+    async (productId, size, color, quantity = 1) => {
+      const newItem = { productId, size, color, quantity }
       setCartItems((prevItems) => {
         const existingItemIndex = prevItems.findIndex(
           (item) => item.productId === productId && item.size === size && item.color === color,
@@ -92,7 +121,7 @@ const ShopContextProvider = (props) => {
         let newItems
         if (existingItemIndex > -1) {
           newItems = [...prevItems]
-          newItems[existingItemIndex].quantity += 1
+          newItems[existingItemIndex].quantity += quantity
         } else {
           newItems = [...prevItems, newItem]
         }
@@ -150,6 +179,8 @@ const ShopContextProvider = (props) => {
       const product = products.find((p) => p._id === cartItem?.productId)
       if (product) {
         total += product.price * cartItem.quantity
+      } else {
+        console.warn(`Product not found for cart item: ${cartItem?.productId}`)
       }
       return total
     }, 0)
@@ -159,19 +190,47 @@ const ShopContextProvider = (props) => {
     return cartItems.reduce((total, item) => total + item.quantity, 0)
   }, [cartItems])
 
+  const clearCart = useCallback(() => {
+    setCartItems([])
+    localStorage.removeItem("cartItems")
+  }, [])
+
+  const cleanInvalidCartItems = useCallback(() => {
+    if (!products || products.length === 0) return
+    
+    setCartItems(prevItems => {
+      const validItems = prevItems.filter(cartItem => {
+        const product = products.find(p => p._id === cartItem.productId)
+        if (!product) {
+          console.warn(`Removing invalid cart item: ${cartItem.productId}`)
+          return false
+        }
+        return true
+      })
+      
+      // Update localStorage with cleaned cart
+      localStorage.setItem("cartItems", JSON.stringify(validItems))
+      return validItems
+    })
+  }, [products])
+
   useEffect(() => {
     if (products.length === 0) {
       getProducts()
+    } else {
+      // Clean invalid cart items when products are loaded
+      cleanInvalidCartItems()
     }
-  }, [getProducts, products.length])
+  }, [getProducts, products.length, cleanInvalidCartItems])
 
   useEffect(() => {
     getTotalCartItems()
   }, [token, getTotalCartItems])
 
-  const clearCart = useCallback(() => {
-    setCartItems([])
-  }, [])
+  // Save cart items to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems))
+  }, [cartItems])
 
   const contextValue = {
     products,
@@ -188,6 +247,7 @@ const ShopContextProvider = (props) => {
     setCartItems,
     getTotalCartItems,
     clearCart,
+    cleanInvalidCartItems,
     token,
     loading,
     cartLoading,

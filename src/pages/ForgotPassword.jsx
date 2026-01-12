@@ -1,147 +1,47 @@
-// /* eslint-disable react-hooks/exhaustive-deps */
-// import React, { useEffect, useState } from 'react';
-// import { useNavigate, useParams } from 'react-router-dom';
-// import { ToastContainer, toast } from 'react-toastify';
-
-// function ForgotPassword() {
-//     const { id, token } = useParams();
-//     const history = useNavigate();
-//     const [password, setPassword] = useState("");
-//     const [isValid, setIsValid] = useState(false);  // Track token validity
-
-//     const handleChange = (e) => {
-//         setPassword(e.target.value);
-//     };
-
-//     const userValid = async () => {
-//         const res = await fetch(`https://api.silksew.com/api/forgot-password/forgotpassword/${id}/${token}`, {
-//             method: "GET",
-//             headers: {
-//                 "Content-Type": "application/json"
-//             }
-//         });
-
-//         const data = await res.json();
-//         if (data.status === 401) {
-//             toast.error("Token expired, please request a new one.", {
-//                 position: "top-center"
-//             });
-//             // Redirect after 1 second to give time for the toast message
-//             setTimeout(() => {
-//                 history("/login");
-//             }, 1000); 
-//         } else {
-//             setIsValid(true);  // Token is valid, show the form
-//         }
-//     };
-
-//     const sendPassword = async (e) => {
-//         e.preventDefault();
-
-//         if (password === "") {
-//             toast.error("Password is required!", { position: "top-center" });
-//         } else if (password.length < 6) {
-//             toast.error("Password must be 6 characters!", { position: "top-center" });
-//         } else {
-//             const res = await fetch(`https://api.silksew.com/api/change-password/${id}/${token}`, {
-//                 method: "POST",
-//                 headers: {
-//                     "Content-Type": "application/json"
-//                 },
-//                 body: JSON.stringify({ password })
-//             });
-
-//             const data = await res.json();
-
-//             if (data.status === 201) {
-//                 setPassword("");
-//                 toast.success("Password Updated Successfully!");
-//             } else {
-//                 toast.error("Token Expired. Generate a new link", { position: "top-center" });
-//             }
-//         }
-//     };
-
-//     useEffect(() => {
-//         userValid();
-//     }, []);
-
-//     return (
-//         <>
-//             {isValid ? (
-//                 <form onSubmit={sendPassword}>
-//                     <div className="loginsignup">
-//                         <div className="loginsignup-container">
-//                             <h1>Enter Your New Password</h1>
-//                             <div className="loginsignup-fields">
-//                                 <label htmlFor="password" style={{ fontWeight: "600", color: "#333" }}>
-//                                     New Password
-//                                 </label>
-//                                 <input
-//                                     value={password}
-//                                     onChange={handleChange}
-//                                     type="password"
-//                                     placeholder="Enter your new password"
-//                                     required
-//                                 />
-//                             </div>
-//                             <button type="submit">Send</button>
-//                         </div>
-//                     </div>
-//                 </form>
-//             ) : (
-//                 <p>Redirecting...</p>  // Display a message while the page is redirecting or invalid
-//             )}
-//             <ToastContainer />
-//         </>
-//     );
-// }
-
-// export default ForgotPassword;
 
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import axios from "axios";
+import { BASEURL } from "../config";
 
 function ForgotPassword() {
   const { id, token } = useParams(); // get id + token from URL
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isValid, setIsValid] = useState(false); // track token validity
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // ✅ Verify token validity when page loads
   const verifyUser = async () => {
     try {
-      const res = await fetch(
-        `https://api.silksew.com/api/reset-password/forgotpassword/${id}/${token}`,
+      const res = await axios.get(
+        `${BASEURL}/api/forgot-password/forgotpassword/${id}/${token}`,
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
 
-      const data = await res.json();
-
-      if (data.status === 401) {
+      if (res.data.success) {
+        setIsValid(true);
+      } else {
         toast.error("Token expired or invalid. Please request a new link.", {
           position: "top-center",
         });
-        setTimeout(() => navigate("/login"), 1500);
-      } else {
-        setIsValid(true);
+        setTimeout(() => navigate("/forgot-password"), 1500);
       }
     } catch (error) {
       console.error("Error verifying token:", error);
-      toast.error("Something went wrong. Try again later.");
-      setTimeout(() => navigate("/login"), 1500);
-    } finally {
-      setLoading(false);
+      toast.error("Invalid or expired reset link. Please request a new one.", {
+        position: "top-center",
+      });
+      setTimeout(() => navigate("/forgot-password"), 1500);
     }
   };
 
@@ -150,46 +50,61 @@ function ForgotPassword() {
     e.preventDefault();
 
     if (!password) {
-      toast.error("Password is required!", { position: "top-center" });
+      toast.error("Please enter a new password", { position: "top-center" });
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long.", {
+      toast.error("Password must be at least 6 characters long", {
         position: "top-center",
       });
       return;
     }
 
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match", { position: "top-center" });
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const res = await fetch(
-        `https://api.silksew.com/api/reset-password/${id}/${token}`,
+      const res = await axios.post(
+        `${BASEURL}/api/change-password/${id}/${token}`,
         {
-          method: "POST",
+          password: password,
+        },
+        {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ password }),
         }
       );
 
-      const data = await res.json();
-
-      if (data.status === 201) {
-        toast.success("Password updated successfully!", {
+      if (res.data.status === 201) {
+        toast.success("Password Updated Successfully!", {
           position: "top-center",
         });
         setPassword("");
-        setTimeout(() => navigate("/login"), 1500);
+        setConfirmPassword("");
+        
+        // Redirect to login after success
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       } else {
-        toast.error("Token expired or invalid. Please request a new link.", {
+        toast.error(res.data.message || "Failed to update password", {
           position: "top-center",
         });
-        setTimeout(() => navigate("/login"), 1500);
       }
     } catch (error) {
-      console.error("Error updating password:", error);
-      toast.error("Something went wrong. Try again later.");
+      console.error("Password update error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to update password. Try again.",
+        { position: "top-center" }
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,42 +113,74 @@ function ForgotPassword() {
   }, []);
 
   return (
-    <>
-      {loading ? (
-        <p style={{ textAlign: "center", marginTop: "100px" }}>
-          Verifying link...
-        </p>
-      ) : isValid ? (
-        <form onSubmit={handleSubmit}>
-          <div className="loginsignup">
-            <div className="loginsignup-container" style={{ marginTop: "150px" }}>
-              <h1>Enter Your New Password</h1>
-              <div className="loginsignup-fields">
-                <label
-                  htmlFor="password"
-                  style={{ fontWeight: "600", color: "#333" }}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md mx-auto">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 p-6 text-center">
+          <h1 className="text-2xl font-bold text-white mb-2">Reset Password</h1>
+          <p className="text-white/90 text-sm">
+            Enter your new password
+          </p>
+        </div>
+
+        {/* Form Section */}
+        <div className="p-6">
+          {isValid ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label 
+                  htmlFor="password" 
+                  className="block text-sm font-semibold text-gray-700 mb-2"
                 >
                   New Password
                 </label>
                 <input
+                  id="password"
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  type="password"
                   placeholder="Enter your new password"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
                   required
                 />
               </div>
-              <button type="submit">Update Password</button>
+
+              <div>
+                <label 
+                  htmlFor="confirmPassword" 
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your new password"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-500 text-white text-lg font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:scale-100 disabled:cursor-not-allowed"
+              >
+                {loading ? "Updating..." : "Update Password"}
+              </button>
+            </form>
+          ) : (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Verifying reset link...</p>
             </div>
-          </div>
-        </form>
-      ) : (
-        <p style={{ textAlign: "center", marginTop: "100px" }}>
-          Redirecting...
-        </p>
-      )}
+          )}
+        </div>
+      </div>
       <ToastContainer />
-    </>
+    </div>
   );
 }
 

@@ -183,6 +183,8 @@ const OrderItems = () => {
         createdAt: order.createdAt,
         tentativeDeliveryDate: order.tentativeDeliveryDate,
         status: order.status || "Order Placed",
+        orderProcess: order.orderProcess || "Order Placed",
+        paymentMethod: order.paymentMethod,
       }))
       .filter((item) => products.find((p) => p._id === item.productId))
   );
@@ -242,6 +244,8 @@ const OrderItems = () => {
                   orderId,
                   createdAt,
                   status,
+                  orderProcess,
+                  paymentMethod,
                 } = item;
 
                 const product = products.find((p) => p._id === productId);
@@ -282,6 +286,30 @@ const OrderItems = () => {
                         <p className="text-gray-500 text-xs">
                           Ordered on: {new Date(createdAt).toLocaleDateString()}
                         </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-xs text-gray-500">Payment:</span>
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                            paymentMethod === "Razorpay" 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-blue-100 text-blue-800"
+                          }`}>
+                            {paymentMethod === "Razorpay" ? "Paid Online" : "Cash on Delivery"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-500">Status:</span>
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                            orderProcess === "Delivered" 
+                              ? "bg-green-100 text-green-800"
+                              : orderProcess === "Shipped"
+                              ? "bg-blue-100 text-blue-800"
+                              : orderProcess === "Packed"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}>
+                            {orderProcess}
+                          </span>
+                        </div>
                       </div>
                     </div>
 

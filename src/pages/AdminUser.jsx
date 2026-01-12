@@ -8,11 +8,11 @@ import moment from "moment"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
-const AdminUser = ({ updateTotalOrders }) => {
+const AdminUser = ({ updateTotalOrders, updateNewOrdersCount }) => {
   const [addresses, setAddresses] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 3
+  const itemsPerPage = 10
   const { token } = useContext(ShopContext)
 
   const handleSearchChange = (e) => {
@@ -23,10 +23,20 @@ const AdminUser = ({ updateTotalOrders }) => {
   const statusHandler = async (event, _id) => {
     const newStatus = event.target.value
     try {
+      // Update order status
       await axios.post(BASEURL + "/api/updateOrderStatus/order-status", {
         _id,
         status: newStatus,
       })
+      
+      // If order is confirmed, also update payment to "Paid"
+      if (newStatus === "Confirmed") {
+        await axios.post(BASEURL + "/api/updatePayment/payment-status", {
+          _id,
+          payment: "Paid",
+        })
+      }
+      
       await fetchUserDetails()
       toast.success(`Order status has been updated to ${newStatus}!`, {
         position: "top-right",
@@ -39,6 +49,61 @@ const AdminUser = ({ updateTotalOrders }) => {
     } catch (error) {
       console.log(error)
       toast.error("Failed to update order status. Please try again.", {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    }
+  }
+
+  const orderProcessHandler = async (event, _id) => {
+    const newProcess = event.target.value
+    try {
+      // Update order process
+      await axios.post(BASEURL + "/api/orders/update-order-process", {
+        _id,
+        orderProcess: newProcess,
+      })
+      
+      // Update status based on order process
+      let newStatus = "Pending"
+      if (newProcess === "Packed") {
+        newStatus = "Pending"
+      } else if (newProcess === "Shipped") {
+        newStatus = "Pending"
+      } else if (newProcess === "Delivered") {
+        newStatus = "Confirmed"
+      }
+      
+      // Update the status
+      await axios.post(BASEURL + "/api/updateOrderStatus/order-status", {
+        _id,
+        status: newStatus,
+      })
+      
+      // If order is confirmed (delivered), also update payment to "Paid"
+      if (newStatus === "Confirmed") {
+        await axios.post(BASEURL + "/api/updatePayment/payment-status", {
+          _id,
+          payment: "Paid",
+        })
+      }
+      
+      await fetchUserDetails()
+      toast.success(`Order process updated to ${newProcess}!`, {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    } catch (error) {
+      console.log(error)
+      toast.error("Failed to update order process. Please try again.", {
         position: "top-right",
         autoClose: 1000,
         hideProgressBar: false,
@@ -94,6 +159,12 @@ const AdminUser = ({ updateTotalOrders }) => {
       console.log("order details get", response)
       setAddresses(response.data)
       updateTotalOrders(response.data.length)
+      
+      // Calculate new orders (pending orders)
+      const pendingOrders = response.data.filter(order => order.status !== "Confirmed")
+      if (updateNewOrdersCount) {
+        updateNewOrdersCount(pendingOrders.length)
+      }
     } catch (err) {
       console.error("Error fetching orders:", err)
       toast.error("Failed to fetch orders. Please try again.", {
@@ -117,7 +188,7 @@ const AdminUser = ({ updateTotalOrders }) => {
   const filteredOrders = addresses
     .filter(
       (order) =>
-        order.address.firstName?.toLowerCase().includes(searchTerm?.toLowerCase()) && order.status !== "ConfirmedOrder",
+        order.address.firstName?.toLowerCase().includes(searchTerm?.toLowerCase()),
     )
     .sort((a, b) => {
       if (a.status === "Confirmed" && b.status !== "Confirmed") return 1
@@ -176,11 +247,17 @@ const AdminUser = ({ updateTotalOrders }) => {
       overflowX: "auto",
       WebkitOverflowScrolling: "touch",
       margin: "0 -16px",
-      padding: "0 16px"
+      padding: "0 16px",
+      minHeight: "500px",
+      border: "1px solid #e5e7eb",
+      borderRadius: "8px",
+      backgroundColor: "white"
     },
     table: {
       width: "100%",
-      borderCollapse: "collapse"
+      minWidth: "1400px",
+      borderCollapse: "collapse",
+      tableLayout: "auto"
     },
     th: {
       padding: "12px",
@@ -238,6 +315,10 @@ const AdminUser = ({ updateTotalOrders }) => {
       borderRadius: "9999px",
       backgroundColor: "#dcfce7",
       color: "#166534"
+    },
+    deliveredBadge: {
+      backgroundColor: "#fee2e2",
+      color: "#dc2626"
     },
     noOrders: {
       padding: "32px 24px",
@@ -519,16 +600,20 @@ const AdminUser = ({ updateTotalOrders }) => {
               <th style={styles.th}>Product Details</th>
               <th style={styles.th}>User Details</th>
               <th style={styles.th}>Address</th>
-              <th style={styles.th}>Payment</th>
               <th style={styles.th}>Payment Method</th>
               <th style={styles.th}>Total Amount</th>
+              <th style={styles.th}>Process of Order</th>
               <th style={styles.th}>Status</th>
             </tr>
           </thead>
           <tbody>
             {currentItems.length > 0 ? (
               currentItems.map((order, index) => (
-                <tr key={order._id} style={order.status === "Confirmed" ? {...styles.tr, ...styles.confirmedRow} : styles.tr}>
+                <tr key={order._id} style={
+  order.paymentMethod === "Razorpay" || order.status === "Confirmed" 
+    ? {...styles.tr, ...styles.confirmedRow} 
+    : styles.tr
+}>
                   <td data-label="Sr. No" style={styles.td}>{index + 1}</td>
                   <td data-label="Product Details" style={styles.td}>
                     <div style={styles.detailContainer}>
@@ -556,28 +641,38 @@ const AdminUser = ({ updateTotalOrders }) => {
                       <p style={styles.detailText}><strong>City:</strong> {order.address.city}</p>
                       <p style={styles.detailText}><strong>State:</strong> {order.address.state}</p>
                       <p style={styles.detailText}><strong>Landmark:</strong> <span style={styles.smallText}>{order.address.landMark}</span></p>
+                      <p style={styles.detailText}><strong>Pincode:</strong> {order.address.pincode}</p>
                     </div>
                   </td>
-                  <td data-label="Payment" style={styles.td}>
-                    <select
-                      onChange={(event) => paymentStatusHandler(event, order._id)}
-                      value={order.payment}
-                      style={styles.select}
-                    >
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
-                    </select>
-                  </td>
                   <td data-label="Payment Method" style={styles.td}>{order.paymentMethod}</td>
-                  <td data-label="Total Amount" style={styles.td}>Rs.{order.totalAmount}</td>
+                  <td data-label="Total Amount" style={styles.td}>
+                    {order.paymentMethod === "Razorpay" ? "Paid online" : "COD"}
+                  </td>
+                  <td data-label="Process of Order" style={styles.td}>
+                    {order.orderProcess === "Delivered" ? (
+                      <span style={{...styles.confirmedBadge, ...styles.deliveredBadge}}>Delivered</span>
+                    ) : (
+                      <select
+                        onChange={(event) => orderProcessHandler(event, order._id)}
+                        value={order.orderProcess || "Order Placed"}
+                        style={styles.select}
+                      >
+                        <option value="Order Placed">Order Placed</option>
+                        <option value="Packed">Packed</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                      </select>
+                    )}
+                  </td>
                   <td data-label="Status" style={styles.td}>
-                    {order.status === "Confirmed" ? (
-                      <span style={styles.confirmedBadge}>Confirmed</span>
+                    {order.orderProcess === "Delivered" ? (
+                      <span style={styles.confirmedBadge}>{order.status}</span>
                     ) : (
                       <select
                         onChange={(event) => statusHandler(event, order._id)}
-                        value={order.status}
+                        value={order.status || "pending"}
                         style={styles.select}
+                        disabled={order.orderProcess !== "Delivered"}
                       >
                         <option value="pending">Pending</option>
                         <option value="Confirmed">Confirmed</option>

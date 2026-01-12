@@ -4,57 +4,87 @@ import axios from "axios";
 import { BASEURL } from "../../config";
 
 const OrderTracker = ({ orderId }) => {
-  const steps = ["Order Placed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
+  const steps = ["Order Placed", "Packed", "Shipped", "Delivered"];
   const [currentStatus, setCurrentStatus] = useState("Order Placed");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTracking = async () => {
+    const fetchOrderStatus = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${BASEURL}/api/orders/track/${orderId}`, {
+        
+        // First, get order details to check orderProcess
+        const orderResponse = await axios.get(`${BASEURL}/api/orders/myorders`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.data.success) {
-          const data = response.data.data;
-          const orderTracking = Object.values(data[0])[0]?.tracking_data;
-          const trackStatus = orderTracking?.shipment_status;
-
-          // Map Shiprocket status codes to steps
-          if (orderTracking?.shipment_track?.length > 0 && trackStatus === 0) {
-            setCurrentStatus("Packed");
+        if (orderResponse.data) {
+          const order = orderResponse.data.find(o => o._id === orderId);
+          
+          if (order && order.orderProcess) {
+            // Use orderProcess set by admin
+            setCurrentStatus(order.orderProcess);
           } else {
-            switch (trackStatus) {
-              case 0:
-                setCurrentStatus("Order Placed");
-                break;
-              case 1:
-                setCurrentStatus("Shipped");
-                break;
-              case 2:
-                setCurrentStatus("Out for Delivery");
-                break;
-              case 3:
-                setCurrentStatus("Delivered");
-                break;
-              default:
-                setCurrentStatus("Order Placed");
+            // Fallback to Shiprocket tracking for shipped orders
+            try {
+              const trackingResponse = await axios.get(`${BASEURL}/api/orders/track/${orderId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              if (trackingResponse.data.success) {
+                const data = trackingResponse.data.data;
+                const orderTracking = Object.values(data[0])[0]?.tracking_data;
+                const trackStatus = orderTracking?.shipment_status;
+
+                // Map Shiprocket status codes to steps
+                switch (trackStatus) {
+                  case 0:
+                    setCurrentStatus("Packed");
+                    break;
+                  case 1:
+                    setCurrentStatus("Shipped");
+                    break;
+                  case 2:
+                    setCurrentStatus("Out for Delivery");
+                    break;
+                  case 3:
+                    setCurrentStatus("Delivered");
+                    break;
+                  default:
+                    setCurrentStatus("Order Placed");
+                }
+              }
+            } catch (trackingError) {
+              console.log("Tracking not available, using order status");
+              // If no tracking available, use order status
+              if (order && order.status) {
+                switch (order.status) {
+                  case "Confirmed":
+                    setCurrentStatus("Packed");
+                    break;
+                  case "Shipped":
+                    setCurrentStatus("Shipped");
+                    break;
+                  case "Delivered":
+                    setCurrentStatus("Delivered");
+                    break;
+                  default:
+                    setCurrentStatus("Order Placed");
+                }
+              }
             }
           }
-        } else {
-          setCurrentStatus("Order Placed");
         }
       } catch (err) {
-        console.error("Error fetching tracking info:", err);
+        console.error("Error fetching order status:", err);
         setCurrentStatus("Order Placed");
       } finally {
         setLoading(false);
       }
     };
 
-    if (orderId) fetchTracking();
+    fetchOrderStatus();
   }, [orderId]);
 
   const currentStep = steps.indexOf(currentStatus) + 1;
