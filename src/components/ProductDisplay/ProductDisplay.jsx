@@ -32,57 +32,99 @@ const ProductDisplay = () => {
   const [selectedSize, setSelectedSize] = useState("")
   const [selectedColor, setSelectedColor] = useState("")
   const [mainImage, setMainImage] = useState("")
+  const [isOfferActive, setIsOfferActive] = useState(false)
+  const [offerCountdown, setOfferCountdown] = useState("")
   const [activeTab, setActiveTab] = useState("description")
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
   const [quantity, setQuantity] = useState(1)
-
+  const [selectedImage, setSelectedImage] = useState("")
+  const [selectedDescription, setSelectedDescription] = useState("")
   const navigate = useNavigate()
-  const [offerCountdown, setOfferCountdown] = useState("")
-  const [isOfferActive, setIsOfferActive] = useState(false)
+  
+  // Check if current time is within offer window
+  const isWithinOfferWindow = (startDate, endDate) => {
+    if (!startDate || !endDate) return false;
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return now >= start && now <= end;
+  };
 
-  const getOfferCountdown = (offerEndDate) => {
-    if (!offerEndDate) return null
+  // Calculate offer countdown
+  const getOfferCountdown = (endDate) => {
+    if (!endDate) return "";
+    const end = new Date(endDate);
+    const now = new Date();
+    const diff = end - now;
+    
+    if (diff <= 0) return "Offer expired";
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${days}d ${hours}h ${minutes}m left`;
+  };
+  
+  // Calculate discount percentage
+  const calcDiscountPercent = (originalPrice, discountedPrice) => {
+    if (!originalPrice || !discountedPrice) return 0;
+    return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+  };
 
-    const now = new Date()
-    const end = new Date(offerEndDate)
-    const diff = end - now
+  const handleAddToCart = () => {
+    if (!authToken) {
+      setShowLoginModal(true)
+      return
+    }
 
-    if (diff <= 0) return null // offer expired
+    if (!selectedSize || !selectedColor) {
+      toast.error("Please select size and color")
+      return
+    }
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
-    const minutes = Math.floor((diff / (1000 * 60)) % 60)
-    const seconds = Math.floor((diff / 1000) % 60)
+    if (!product || !product._id) {
+      toast.error("Product information is not available")
+      return
+    }
 
-    if (days >= 1) {
-      return `${days} day${days > 1 ? 's' : ''} left`
-    } else {
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    try {
+      // Call addToCart with the correct parameters
+      addToCart(
+        product._id,  // productId
+        selectedSize, // size
+        selectedColor, // color
+        quantity      // quantity
+      )
+      
+      // Show success message
+      toast.success("Product added to cart")
+      
+      // Reset quantity after adding to cart
+      setQuantity(1)
+    } catch (error) {
+      console.error("Error adding to cart:", error)
+      toast.error("Failed to add product to cart. Please try again.")
     }
   }
 
-  const isWithinOfferWindow = (start, end) => {
-    if (!end) return false
-    const now = new Date()
-    const startDate = start ? new Date(start) : null
-    const endDate = new Date(end)
-    return (startDate ? now >= startDate : true) && now < endDate
+  const handleImageChange = (image) => {
+    setSelectedImage(image)
   }
 
-  const calcDiscountPercent = (price, oldPrice, discountPercent) => {
-    if (typeof discountPercent === 'number' && discountPercent > 0) return Math.round(discountPercent)
-    if (oldPrice && oldPrice > price) {
-      const pct = Math.round(((oldPrice - price) / oldPrice) * 100)
-      return pct > 0 ? pct : 0
-    }
-    return 0
+  const handleDescriptionChange = (description) => {
+    setSelectedDescription(description)
   }
+
+  const handleReviewsChange = (reviews) => {
+    setFilterReview(reviews);
+  };
 
   // Check if product has discount-only offer (no timeline)
   const hasDiscountOnly = (product) => {
-    return product.discountPercent && product.discountPercent > 0 && !product.offerEndDate
-  }
+    return product.discountPercent && product.discountPercent > 0 && !product.offerEndDate;
+  };
 
   // Calculate discounted price
   const calculateDiscountedPrice = (originalPrice, discountPercent) => {
@@ -388,7 +430,6 @@ const ProductDisplay = () => {
   const handleQuantityIncrease = () => {
     setQuantity(prev => Math.min(prev + 1, 10)) // Max 10 items
   }
-
   const handleQuantityDecrease = () => {
     setQuantity(prev => Math.max(prev - 1, 1)) // Min 1 item
   }
@@ -412,41 +453,27 @@ const ProductDisplay = () => {
       return
     }
 
-    // Add to cart with quantity and navigate to checkout
-    addToCart(product._id, selectedSize, selectedColor, quantity)
-    toast.success("Added to cart!", { position: "top-right", autoClose: 1000 })
-    setTimeout(() => navigate("/checkout"), 1000)
-  }
-
-  const handleAddToCart = () => {
-    if (!authToken) {
-      setShowLoginModal(true)
-      return
-    }
-
-    if (!selectedSize) {
-      toast.error("Select a size.", { position: "top-right", autoClose: 1000 })
-      return
-    }
-
-    if (!selectedColor) {
-      toast.error("Select a color.", {
-        position: "top-right",
-        autoClose: 1000,
-      })
-      return
-    }
-
-    console.log("Adding to cart:", {
+    // Create a buy now product object
+    const buyNowProduct = {
       productId: product._id,
       size: selectedSize,
       color: selectedColor,
-      quantity: quantity
-    })
+      quantity: quantity,
+      productDetails: {
+        ...product,
+        price: product.price,
+        name: product.name,
+        images: product.images
+      }
+    }
 
-    addToCart(product._id, selectedSize, selectedColor, quantity)
-    toast.success("Added to cart!", { position: "top-right", autoClose: 1000 })
-    setTimeout(() => navigate("/cart"), 1000)
+    // Navigate to checkout with the buy now product
+    navigate("/checkout", { 
+      state: { 
+        buyNowProduct,
+        fromBuyNow: true 
+      } 
+    })
   }
 
   const handleColorChange = (color) => {
@@ -529,7 +556,7 @@ const ProductDisplay = () => {
 
           {/* Right Side - Product Details */}
           <div className="productdisplay-right">
-            <h2>{product.name}</h2>
+            <h4>{product.name}</h4>
 
             {/* Description with Read More */}
             <div className="description-container">

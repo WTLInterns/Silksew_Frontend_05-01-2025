@@ -414,7 +414,7 @@
 
 //       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 //       const response = await axios.post(
-//         "https://api.silksew.com/api/products",
+//         "http://localhost:5003/api/products",
 //         productData,
 //         {
 //           headers: {
@@ -1188,7 +1188,7 @@ const AdminProductForm = () => {
 
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       const response = await axios.post(
-        "https://api.silksew.com/api/products",
+        "http://localhost:5003/api/products",
         productData,
         {
           headers: {

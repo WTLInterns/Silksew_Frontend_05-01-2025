@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./RelatedProducts.css";
-import FavoriteButton from "../common/FavoriteButton";
 
 const RelatedProducts = ({ subcategory, currentProductId }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -18,7 +16,7 @@ const RelatedProducts = ({ subcategory, currentProductId }) => {
 
     const fetchRelatedProducts = async () => {
       try {
-        const response = await axios.get("https://api.silksew.com/api/products", {
+        const response = await axios.get("http://localhost:5003/api/products", {
           params: { exclude: currentProductId },
         });
 
@@ -69,13 +67,6 @@ const RelatedProducts = ({ subcategory, currentProductId }) => {
     }));
   };
 
-  // Handle Next Slide
-  const nextSlide = () => {
-    if (currentIndex + 4 < relatedProducts.length) {
-      setCurrentIndex(currentIndex + 4);
-    }
-  };
-
   const truncateDescription = (description) => {
     if (description && description.length > MAX_DESCRIPTION_LENGTH) {
       return description.substring(0, MAX_DESCRIPTION_LENGTH) + "...";
@@ -91,13 +82,6 @@ const RelatedProducts = ({ subcategory, currentProductId }) => {
     return name || "";
   };
 
-  // Handle Previous Slide
-  const prevSlide = () => {
-    if (currentIndex - 4 >= 0) {
-      setCurrentIndex(currentIndex - 4);
-    }
-  };
-
   const onProductClick = (item) => {
     navigate(`/product/${item._id}`, { state: { product: item } });
   };
@@ -108,16 +92,9 @@ const RelatedProducts = ({ subcategory, currentProductId }) => {
 
   return (
     <div className="related-products-container">
-      <hr />
-      <div className="carousel-container">
-        {currentIndex > 0 && (
-          <button className="carousel-btn left" onClick={prevSlide}>
-            &#10094;
-          </button>
-        )}
-
-        <div className="product-grid">
-          {relatedProducts.slice(currentIndex, currentIndex + 4).map((item) => {
+      <h2 className="related-products-title">You May Also Like</h2>
+      <div className="product-grid">
+        {relatedProducts.map((item) => {
             let imageUrl = "";
             try {
               const imageObj = JSON.parse(item.images[0]);
@@ -141,12 +118,6 @@ const RelatedProducts = ({ subcategory, currentProductId }) => {
                     onLoad={() => handleImageLoaded(item._id)}
                     onError={() => handleImageError(item._id)}
                   />
-                  <div 
-                    className="absolute top-3 right-3 z-10" 
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <FavoriteButton productId={item._id} />
-                  </div>
                   <div className="image-overlay">
                     <button
                       className="quick-view-button"
@@ -185,13 +156,6 @@ const RelatedProducts = ({ subcategory, currentProductId }) => {
             );
           })}
         </div>
-
-        {currentIndex + 4 < relatedProducts.length && (
-          <button className="carousel-btn right" onClick={nextSlide}>
-            &#10095;
-          </button>
-        )}
-      </div>
     </div>
   );
 };

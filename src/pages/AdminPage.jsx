@@ -139,24 +139,24 @@ const Dashboard = () => {
     
     try {
       if (type === "Products") {
-        const response = await axios.get("https://api.silksew.com/api/products", {
+        const response = await axios.get("http://localhost:5003/api/products", {
           headers: { Authorization: `Bearer ${token}` },
         })
         setAllProducts(Array.isArray(response.data) ? response.data : response.data.products || [])
       } else if (type === "Orders") {
-        const response = await axios.get("https://api.silksew.com/api/orders", {
+        const response = await axios.get("http://localhost:5003/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         })
         const ordersData = Array.isArray(response.data) ? response.data : response.data.orders || []
         setAllOrders(ordersData)
       } else if (type === "Confirmed") {
-        const response = await axios.get("https://api.silksew.com/api/orders", {
+        const response = await axios.get("http://localhost:5003/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         })
         const ordersData = Array.isArray(response.data) ? response.data : response.data.orders || []
         setConfirmedOrders(ordersData.filter(order => order.status === "Confirmed"))
       } else if (type === "Pending") {
-        const response = await axios.get("https://api.silksew.com/api/orders", {
+        const response = await axios.get("http://localhost:5003/api/orders", {
           headers: { Authorization: `Bearer ${token}` },
         })
         const ordersData = Array.isArray(response.data) ? response.data : response.data.orders || []
@@ -189,7 +189,7 @@ const Dashboard = () => {
         // Fetch products
         let productsData = []
         try {
-          const productsResponse = await axios.get("https://api.silksew.com/api/products", {
+          const productsResponse = await axios.get("http://localhost:5003/api/products", {
             headers: { Authorization: `Bearer ${token}` },
             timeout: 10000, // 10 seconds timeout
           })
@@ -206,7 +206,7 @@ const Dashboard = () => {
         // Fetch orders
         let ordersData = []
         try {
-          const ordersResponse = await axios.get("https://api.silksew.com/api/orders", {
+          const ordersResponse = await axios.get("http://localhost:5003/api/orders", {
             headers: { Authorization: `Bearer ${token}` },
             timeout: 10000, // 10 seconds timeout
           })

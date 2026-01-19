@@ -16,7 +16,7 @@ export const getConfig = () => {
 // Axios default configuration
 export const setupAxios = () => {
   // Default to production API unless explicitly overridden
-  const base = process.env.REACT_APP_API_BASE_URL || 'https://api.silksew.com';
+  const base = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5003';
   axios.defaults.baseURL = base;
   
   // Add a request interceptor to include auth token (localStorage or sessionStorage)

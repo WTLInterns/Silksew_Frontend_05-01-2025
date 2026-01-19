@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect } from "react"
 import { ShopContext } from "../../context/ShopContext"
 import razorpay from "../Assets/razorpay_logo.png"
 import CashonDelivery from "../Assets/cod.png"
@@ -14,7 +14,6 @@ const OrderSuccessPopup = () => {
     <div className="popup-overlay">
       <div className="popup-content">
         <h2>Order Placed Successfully!</h2>
-        <p>Thank you for your purchase. Your order has been placed and will be processed soon.</p>
       </div>
     </div>
   )
@@ -23,11 +22,20 @@ const OrderSuccessPopup = () => {
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const offerCode = location.state?.offerCode || ""
-  const [method, setMethod] = useState("") // 🔹 no default
+  const { offerCode = "", buyNowProduct, fromBuyNow } = location.state || {};
+  const [method, setMethod] = useState("") // no default
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const { cartItems, delivery_fee, setCartItems, getTotalCartAmount, products, cleanInvalidCartItems } = useContext(ShopContext)
+  const { cartItems, delivery_fee, setCartItems, getTotalCartAmount, products, cleanInvalidCartItems, addToCart } = useContext(ShopContext)
+  // Handle form input changes
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -41,13 +49,23 @@ const Checkout = () => {
     email: "",
   })
 
-  const subtotal = getTotalCartAmount()
-  const totalAmount = subtotal + delivery_fee
+  // Calculate subtotal based on whether we're in buy now mode or not
+  const calculateSubtotal = () => {
+    if (fromBuyNow && buyNowProduct) {
+      // For Buy Now, only use the buy now product price
+      const price = buyNowProduct.productDetails?.price || 0;
+      const quantity = buyNowProduct.quantity || 1;
+      return price * quantity;
+    }
+    // For regular checkout, use the cart total
+    return getTotalCartAmount();
+  };
 
-  const onChangeHandler = (event) => {
-    const { name, value } = event.target
-    setFormData((data) => ({ ...data, [name]: value }))
-  }
+  const subtotal = calculateSubtotal();
+  // Only add delivery fee if there's a subtotal
+  const totalAmount = subtotal > 0 ? subtotal + delivery_fee : 0;
+
+  // No need to modify cart for Buy Now flow - we'll handle it separately
 
   // ---------- Razorpay helpers ----------
   const loadRazorpayScript = () =>
@@ -60,52 +78,52 @@ const Checkout = () => {
       document.body.appendChild(script);
     });
 
-  const openRazorpayPopup = async () => {
+  const openRazorpayPopup = async (e) => {
+    if (e) e.preventDefault();
+    
     try {
       setIsLoading(true);
 
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
+      // Validate form before proceeding
       if (!validateForm()) {
         setIsLoading(false);
-        return;
+        return false;
       }
 
-      // Wait for products to be loaded if not already
-      if (!products || products.length === 0) {
-        toast.error("Products are still loading. Please wait a moment and try again.");
+      // Get Razorpay key from environment variables
+      const key = process.env.REACT_APP_RAZORPAY_KEY_ID || import.meta?.env?.VITE_RAZORPAY_KEY_ID;
+      if (!key) {
+        toast.error("Missing Razorpay key. Please contact support.");
         setIsLoading(false);
         return;
       }
 
-      const ok = await loadRazorpayScript();
-      if (!ok) {
-        toast.error("Failed to load Razorpay. Check your internet connection.");
-        setIsLoading(false);
-        return;
-      }
+      // Create order data
+      const orderData = {
+        amount: totalAmount * 100, // Convert to paise
+        currency: "INR",
+        receipt: `order_${Date.now()}`,
+        payment_capture: 1
+      };
 
-      const createRes = await axios.post(
+      // Create Razorpay order
+      const orderResponse = await axios.post(
         `${BASEURL}/api/orders/create-razorpay-order`,
-        { amount: totalAmount },
+        orderData,
         { headers }
       );
-      const order = createRes.data;
 
-      const key = process.env.REACT_APP_RAZORPAY_KEY_ID || import.meta?.env?.VITE_RAZORPAY_KEY_ID || "";
-      if (!key) {
-        toast.error("Missing Razorpay public key. Set REACT_APP_RAZORPAY_KEY_ID in your .env");
-        setIsLoading(false);
-        return;
-      }
+      const { order } = orderResponse.data;
 
       const options = {
         key,
         amount: order.amount,
-        currency: order.currency,
-        name: "Silksew",
-        description: "Order Payment",
+        currency: order.currency || 'INR',
+        name: "SilkSew",
+        description: `Payment for your ${fromBuyNow ? 'product' : 'order'}`,
         order_id: order.id,
         handler: async function (response) {
           try {
@@ -115,69 +133,80 @@ const Checkout = () => {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                order_id: order.id,
                 amount: totalAmount,
-                items: cartItems.map((cartItem) => {
-                  const product = products.find((p) => p._id === cartItem.productId)
-                  if (!product) {
-                    console.warn(`Product not found for productId: ${cartItem.productId}`)
-                    return null
-                  }
-                  return {
-                    productId: cartItem.productId,
-                    size: cartItem.size,
-                    productName: product.name,
-                    quantity: cartItem.quantity,
-                    price: product.price,
-                  }
-                }).filter((item) => item !== null),
-                address: {
-                  ...formData,
-                  pincode: formData.zipcode,
-                },
-                totalAmount,
+                items: fromBuyNow && buyNowProduct 
+                  ? [{
+                      productId: buyNowProduct.productId,
+                      size: buyNowProduct.size,
+                      color: buyNowProduct.color,
+                      quantity: buyNowProduct.quantity,
+                      price: buyNowProduct.productDetails?.price || 0,
+                      productName: buyNowProduct.productDetails?.name || "Product"
+                    }]
+                  : cartItems.map(cartItem => {
+                      const product = products.find(p => p._id === cartItem.productId);
+                      return {
+                        productId: cartItem.productId,
+                        size: cartItem.size,
+                        color: cartItem.color,
+                        quantity: cartItem.quantity,
+                        price: product?.price || 0,
+                        productName: product?.name || "Product"
+                      };
+                    }),
+                fromBuyNow: !!fromBuyNow
               },
               { headers }
             );
 
-            if (verifyRes.data?.success) {
-              toast.success("Payment successful ✅");
-              setCartItems([])
-              setShowSuccessPopup(true)
-              setTimeout(() => {
-                setShowSuccessPopup(false)
-                navigate("/")
-              }, 3000)
+            if (verifyRes.data.success) {
+              // Clear cart only if this was a regular checkout
+              if (!fromBuyNow) {
+                setCartItems([]);
+                localStorage.removeItem("cartItems");
+              }
+              
+              // Show success message
+              setShowSuccessPopup(true);
+              setTimeout(() => navigate("/"), 2000);
             } else {
-              toast.error(verifyRes.data?.message || "Payment verification failed");
+              toast.error("Payment verification failed. Please contact support.");
             }
-          } catch (err) {
-            console.error("Verify error:", err);
-            toast.error(err.response?.data?.message || "Payment verification failed");
+          } catch (error) {
+            console.error("Payment verification error:", error);
+            toast.error("Error verifying payment. Please check your orders.");
+          } finally {
+            setIsLoading(false);
           }
         },
         prefill: {
           name: `${formData.firstName} ${formData.lastName}`.trim(),
           email: formData.email,
-          contact: formData.phone,
+          contact: formData.phone
         },
-        theme: { color: "#3399cc" },
-        modal: { ondismiss: function () { } }
+        theme: {
+          color: '#3399cc'
+        }
       };
 
+      // Initialize Razorpay and open payment modal
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch (err) {
-      console.error("Razorpay error:", err);
-      toast.error(err.response?.data?.message || "Unable to open Razorpay");
-    } finally {
+
+      // Handle payment failure
+      rzp.on('payment.failed', function(response) {
+        console.error('Payment failed:', response.error);
+        toast.error('Payment failed. Please try again.');
+        setIsLoading(false);
+      });
+    } catch (error) {
+      console.error('Error in Razorpay payment:', error);
+      toast.error('An error occurred while processing your payment. Please try again.');
       setIsLoading(false);
     }
   };
 
-  const handleRazorpayClick = async (e) => {
-    e.preventDefault();
-    await openRazorpayPopup();
-  };
   // ---------- End Razorpay helpers ----------
 
   const validateForm = () => {
@@ -490,7 +519,7 @@ const Checkout = () => {
           type={method === "Razorpay" ? "button" : "submit"}
           className="submit-button"
           disabled={isLoading}
-          onClick={method === "Razorpay" ? handleRazorpayClick : undefined}
+          onClick={method === "Razorpay" ? openRazorpayPopup : undefined}
           style={{ backgroundColor: "black" }}
         >
           {isLoading ? "Processing..." : "PLACE ORDER"}

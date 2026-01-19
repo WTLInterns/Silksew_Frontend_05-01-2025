@@ -1,17 +1,84 @@
 
-
 .main-container {
   position: relative;
   width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 100vh;
-  width: 100%;
+  width: 100vw;
+  height: 110vh;
   overflow: hidden;
   margin-bottom: 50px;
+}
+
+/* Carousel Container */
+.carousel-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f9fa; /* Neutral background for when image doesn't fill height */
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center 85%;
+  background-repeat: no-repeat;
+  transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+  opacity: 0;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.carousel-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(0, 0, 0, 0.6) 0%, 
+    rgba(0, 0, 0, 0.3) 15%, 
+    rgba(0, 0, 0, 0.3) 85%, 
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.carousel-slide::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(0, 0, 0, 0.1) 10%, 
+    rgba(0, 0, 0, 0.1) 90%, 
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .hero-background {
@@ -20,7 +87,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -169,25 +236,94 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Carousel Controls */
+.carousel-controls {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+.carousel-btn {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 18px;
+}
+
+.carousel-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.carousel-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.carousel-dots .dot.active {
+  background: white;
+  border-color: white;
+  transform: scale(1.2);
+}
+
+.carousel-dots .dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
 /* Features Strip */
 .features-strip {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-top: 1px solid #dee2e6;
   border-bottom: 1px solid #dee2e6;
-  padding: 15px 0;
-  margin: 0 auto 40px auto;
+  padding: 12px 0;
+  margin: -25px 0 15px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
   width: 100%;
+  border-radius: 0;
+  overflow: hidden;
 }
 
 .features-strip-content {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  gap: 60px;
-  max-width: 1500px;
+  gap: 20px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
-  border: 1px solid rgb(150, 101, 109);
+  padding: 0 15px;
+  border: 1px solid rgba(150, 101, 109, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .feature-item {
@@ -230,6 +366,81 @@
   background: #e53e3e;
   color: white;
   transform: scale(1.1);
+}
+
+@media (max-width: 900px) {
+  .features-strip {
+    margin: -20px 0 10px 0;
+    padding: 10px 0;
+    width: 100%;
+  }
+  
+  .features-strip-content {
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    padding: 10px;
+  }
+  
+  .feature-item {
+    flex: 1 1 40%;
+    min-width: 120px;
+    justify-content: center;
+    padding: 5px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .features-strip {
+    padding: 8px 0;
+    margin: -15px 0 10px 0;
+  }
+  
+  .features-strip-content {
+    gap: 8px;
+    padding: 8px 5px;
+  }
+  
+  .feature-item {
+    flex: 1 1 100%;
+    justify-content: center;
+    padding: 3px 0;
+  }
+  
+  .feature-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+  
+  .feature-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .features-strip {
+    padding: 6px 0;
+    margin: -10px 0 8px 0;
+  }
+  
+  .features-strip-content {
+    gap: 6px;
+    padding: 6px 3px;
+  }
+  
+  .feature-item {
+    padding: 2px 0;
+  }
+  
+  .feature-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+  
+  .feature-text {
+    font-size: 10px;
+  }
 }
 
 /* Sale Modal Styles - IMPROVED MOBILE RESPONSIVENESS */
@@ -633,6 +844,10 @@
   .features-strip-content {
     gap: 40px;
   }
+  
+  .carousel-controls {
+    bottom: 60px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -708,6 +923,23 @@
     font-size: 14px;
     gap: 8px;
   }
+  
+  /* Carousel controls mobile adjustments */
+  .carousel-controls {
+    bottom: 50px;
+    gap: 15px;
+  }
+  
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .carousel-dots .dot {
+    width: 8px;
+    height: 8px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -729,10 +961,10 @@
     font-size: 1rem;
   }
   
-  .features-strip-content {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px 20px;
+  .features-strip {
+    margin: -20px 0 15px 0;
+    width: 100%;
+    border-radius: 0;
   }
   
   .feature-item {
@@ -888,7 +1120,7 @@
   
   .features-strip {
     padding: 10px 0;
-    margin-bottom: 30px;
+    margin: -20px 0 20px 0;
   }
   
   .feature-item {

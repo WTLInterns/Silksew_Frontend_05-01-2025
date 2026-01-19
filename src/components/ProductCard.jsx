@@ -56,16 +56,24 @@ const ProductCard = ({ product }) => {
       className="border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
       onClick={() => navigate(`/product/${product._id}`)}
     >
-      <div className="relative">
-        <img
-          src={imageSrc}
-          alt={product.name}
-          className="w-full h-64 object-cover"
-        />
+      <div className="relative pt-[125%] overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img
+            src={imageSrc}
+            alt={product.name}
+            className="w-full h-full object-contain p-2"
+            style={{
+              maxHeight: '100%',
+              maxWidth: '100%',
+              objectFit: 'contain',
+              objectPosition: 'center'
+            }}
+          />
+        </div>
         <button
           onClick={handleFavoriteClick}
           disabled={favoritesLoading[product._id]}
-          className="absolute top-2 right-2 bg-white rounded-full p-2 transition-transform duration-200 transform hover:scale-110"
+          className="absolute top-2 right-2 bg-white rounded-full p-2 transition-transform duration-200 transform hover:scale-110 z-10"
         >
           <Heart 
             className={`w-6 h-6 ${isProductFavorited ? 'text-red-500 fill-current' : 'text-gray-500'}`} 

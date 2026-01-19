@@ -39,7 +39,7 @@ const Navbar = () => {
       try {
         setCategoriesLoading(true);
         console.log('Fetching categories and subcategories...');
-        const response = await fetch('https://api.silksew.com/api/products/categories-subcategories');
+        const response = await fetch('http://localhost:5003/api/products/categories-subcategories');
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -142,7 +142,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleNavigateToCategory = (event) => {
       const { category } = event.detail;
-      fetchProductsBySubcategory(category);
+      fetchProductsByCategory(category);
     };
 
     window.addEventListener('navigateToCategory', handleNavigateToCategory);
@@ -273,10 +273,78 @@ const Navbar = () => {
   };
 
   const handleCategoryClick = (category) => {
-    // Navigate to category page or show all products in this category
-    navigate(`/products?category=${encodeURIComponent(category)}`);
+    // Show all products from all subcategories of this category
+    fetchProductsByCategory(category);
     setShowMobileMenu(false);
     setActiveDropdown(null);
+  };
+
+  // New function to fetch all products from all subcategories of a category
+  const fetchProductsByCategory = async (category) => {
+    try {
+      setSearchLoading(true);
+      
+      // Get all subcategories for this category
+      const subcategories = navigationMenu[category] || [];
+      
+      if (subcategories.length === 0) {
+        console.log('No subcategories found for category:', category);
+        setSubcategoryProducts([]);
+        setSearchLoading(false);
+        return;
+      }
+
+      console.log(`Fetching products for category: ${category}, subcategories:`, subcategories);
+      
+      // Build API URL with all subcategories using the new efficient endpoint
+      const subcategoriesParam = subcategories.map(sub => encodeURIComponent(sub)).join(',');
+      const url = `http://localhost:5003/api/products/by-multiple-subcategories?subcategories=${subcategoriesParam}&category=${encodeURIComponent(category)}`;
+      
+      const response = await fetch(url);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log(`Found ${data.products?.length || 0} products for category ${category}`);
+          setSubcategoryProducts(data.products || []);
+        } else {
+          console.error("API returned error:", data.message);
+          // Fallback to client-side filtering
+          const filteredProducts = products.filter(product =>
+            product.category === category ||
+            (product.subcategory && Array.isArray(product.subcategory) &&
+             product.subcategory.some(sub => subcategories.includes(sub)))
+          );
+          setSubcategoryProducts(filteredProducts);
+        }
+      } else {
+        console.error("Failed to fetch products from API");
+        // Fallback to client-side filtering
+        const filteredProducts = products.filter(product =>
+          product.category === category ||
+          (product.subcategory && Array.isArray(product.subcategory) &&
+           product.subcategory.some(sub => subcategories.includes(sub)))
+        );
+        setSubcategoryProducts(filteredProducts);
+      }
+    } catch (error) {
+      console.error("Error fetching category products:", error);
+      setSearchLoading(false);
+      
+      // Fallback to client-side filtering
+      const subcategories = navigationMenu[category] || [];
+      const filteredProducts = products.filter(product =>
+        product.category === category ||
+        (product.subcategory && Array.isArray(product.subcategory) &&
+         product.subcategory.some(sub => subcategories.includes(sub)))
+      );
+      setSubcategoryProducts(filteredProducts);
+    }
+    
+    // Open the modal to show products
+    setSelectedSubcategory(category); // Set the category as selected subcategory for display
+    setShowOnlyProducts(true);
+    setSearchLoading(false);
   };
 
   const handleSubcategoryClick = (category, subcategory) => {
@@ -314,7 +382,7 @@ const Navbar = () => {
     try {
       if (subcategory === "All Products" || subcategory === "New Arrivals") {
         // Handle special cases: All Products or New Arrivals
-        const response = await fetch("https://api.silksew.com/api/products");
+        const response = await fetch("http://localhost:5003/api/products");
         if (response.ok) {
           const data = await response.json();
           if (data.success) {
@@ -329,7 +397,7 @@ const Navbar = () => {
         }
       } else {
         // Handle regular subcategory with optional category filter
-        let url = `https://api.silksew.com/api/products/by-subcategory?subcategory=${encodeURIComponent(subcategory)}`;
+        let url = `http://localhost:5003/api/products/by-subcategory?subcategory=${encodeURIComponent(subcategory)}`;
         if (category) {
           url += `&category=${encodeURIComponent(category)}`;
         }
@@ -614,6 +682,8 @@ const Navbar = () => {
                       boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
                       zIndex: 50,
                       minWidth: "200px",
+                      maxHeight: "500px",
+                      overflowY: "auto",
                       padding: "8px 0"
                     }}>
                       {subcategories.map((subcategory) => (
@@ -1055,8 +1125,8 @@ const Navbar = () => {
           ) : subcategoryProducts.length > 0 ? (
             <div className="navbar-products-grid" style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "24px",
+              gridTemplateColumns: "repeat(5, 1fr)",
+              gap: "16px",
               paddingBottom: "30px"
             }}>
               {subcategoryProducts.map((product) => {
@@ -1066,19 +1136,19 @@ const Navbar = () => {
                 return (
                   <div key={product._id} style={{
                     backgroundColor: "#fff",
-                    borderRadius: "12px",
-                    padding: "16px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08)",
-                    transition: "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)",
+                    transition: "all 0.3s ease",
                     cursor: "pointer",
                     position: "relative",
                     overflow: "hidden",
-                    border: "1px solid rgba(229, 231, 235, 0.8)"
+                    border: "1px solid rgba(229, 231, 235, 0.6)"
                   }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.transform = "translateY(-6px) scale(1.02)";
-                      e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.1)";
-                      e.currentTarget.style.borderColor = "rgba(217, 119, 6, 0.3)";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)";
+                      e.currentTarget.style.borderColor = "rgba(217, 119, 6, 0.2)";
                     }}
                     onMouseOut={(e) => {
                       e.currentTarget.style.transform = "none";
@@ -1099,24 +1169,29 @@ const Navbar = () => {
 
                     <div style={{
                       width: "100%",
-                      height: "180px",
-                      borderRadius: "10px",
+                      height: "200px",
+                      borderRadius: "6px",
                       overflow: "hidden",
-                      marginBottom: "12px",
+                      marginBottom: "10px",
                       position: "relative",
-                      background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)"
+                      background: "#f8f9fa",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
                     }}>
                       <img
                         src={getProductImage(product)}
                         alt={product.name}
                         style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          transition: "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                          maxWidth: "100%",
+                          maxHeight: "100%",
+                          width: "auto",
+                          height: "auto",
+                          objectFit: "contain",
+                          transition: "transform 0.3s ease"
                         }}
                         onMouseOver={(e) => {
-                          e.target.style.transform = "scale(1.08)";
+                          e.target.style.transform = "scale(1.05)";
                         }}
                         onMouseOut={(e) => {
                           e.target.style.transform = "scale(1)";
@@ -1130,23 +1205,23 @@ const Navbar = () => {
                         <div
                           style={{
                             position: "absolute",
-                            top: "10px",
-                            left: "10px",
+                            top: "8px",
+                            left: "8px",
                             background: priceInfo.isSpecialOffer 
                               ? "linear-gradient(135deg, #16a34a 0%, #15803d 100%)" 
                               : "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
                             color: "white",
-                            padding: "6px 12px",
-                            borderRadius: "20px",
-                            fontSize: "11px",
-                            fontWeight: "700",
+                            padding: "4px 8px",
+                            borderRadius: "12px",
+                            fontSize: "10px",
+                            fontWeight: "600",
                             zIndex: 3,
                             display: "flex",
                             alignItems: "center",
-                            gap: "4px",
-                            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                            gap: "3px",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                             textTransform: "uppercase",
-                            letterSpacing: "0.5px"
+                            letterSpacing: "0.3px"
                           }}
                         >
                           {priceInfo.isSpecialOffer && <span>✨</span>}
@@ -1156,28 +1231,27 @@ const Navbar = () => {
                     </div>
 
                     <h3 style={{
-                      fontSize: "15px",
-                      fontWeight: "700",
-                      margin: "0 0 6px 0",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      margin: "0 0 4px 0",
                       color: "#111827",
                       lineHeight: "1.2",
-                      height: "36px",
+                      height: "30px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       display: "-webkit-box",
                       WebkitLineClamp: "2",
-                      WebkitBoxOrient: "vertical",
-                      letterSpacing: "-0.1px"
+                      WebkitBoxOrient: "vertical"
                     }}>
                       {product.name}
                     </h3>
 
                     <p style={{
-                      fontSize: "12px",
+                      fontSize: "11px",
                       color: "#6b7280",
-                      margin: "0 0 10px 0",
+                      margin: "0 0 8px 0",
                       lineHeight: "1.3",
-                      height: "32px",
+                      height: "28px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       display: "-webkit-box",
@@ -1190,27 +1264,25 @@ const Navbar = () => {
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: "8px",
-                      paddingTop: "6px",
-                      borderTop: "1px solid rgba(229, 231, 235, 0.6)"
+                      gap: "6px",
+                      paddingTop: "4px",
+                      borderTop: "1px solid rgba(229, 231, 235, 0.5)"
                     }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                         <p style={{
-                          fontSize: "18px",
-                          fontWeight: "800",
+                          fontSize: "16px",
+                          fontWeight: "700",
                           color: "#111827",
-                          margin: "0",
-                          letterSpacing: "-0.3px"
+                          margin: "0"
                         }}>
                           ₹{priceInfo.currentPrice}
                         </p>
                         {priceInfo.hasDiscount && priceInfo.oldPrice && (
                           <span style={{
-                            fontSize: "13px",
+                            fontSize: "12px",
                             fontWeight: 500,
                             color: "#9ca3af",
-                            textDecoration: 'line-through',
-                            position: "relative"
+                            textDecoration: 'line-through'
                           }}>₹{priceInfo.oldPrice}</span>
                         )}
                       </div>
@@ -1219,15 +1291,15 @@ const Navbar = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         {priceInfo.hasDiscount && (
                           <span style={{
-                            fontSize: "11px",
+                            fontSize: "10px",
                             color: "#059669",
-                            fontWeight: "700",
+                            fontWeight: "600",
                             background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
-                            padding: "3px 6px",
-                            borderRadius: "6px",
+                            padding: "2px 4px",
+                            borderRadius: "4px",
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: "3px"
+                            gap: "2px"
                           }}>
                             💰 Save ₹{priceInfo.oldPrice - priceInfo.currentPrice}
                           </span>
@@ -1236,15 +1308,15 @@ const Navbar = () => {
                           <span style={{
                             background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
                             color: '#92400e',
-                            padding: '3px 6px',
-                            borderRadius: '6px',
-                            fontWeight: 700,
-                            fontSize: '10px',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            fontWeight: 600,
+                            fontSize: '9px',
                             whiteSpace: 'nowrap',
                             border: '1px solid rgba(245, 158, 11, 0.3)',
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: "3px"
+                            gap: "2px"
                           }}>⏰ {countdown}</span>
                         )}
                       </div>
@@ -1294,8 +1366,14 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Footer inside the product container */}
-        <Footer />
+        {/* Footer inside product container - FIXED POSITIONING */}
+        <div style={{
+          position: 'relative',
+          marginTop: 'auto',
+          paddingTop: '40px'
+        }}>
+          <Footer />
+        </div>
 
       </div>
     )

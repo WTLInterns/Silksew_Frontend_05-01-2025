@@ -13,14 +13,12 @@ function Women() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Fetch products and filter only those in the 'Women' category
-        const response = await axios.get('https://api.silksew.com/api/products');
+        // Fetch all products (same as Shop Women's Collection button)
+        const response = await axios.get('http://localhost:5003/api/products');
         const fetchedProducts = Array.isArray(response.data) ? response.data : response.data.products;
         
-        // Filter products that belong to the 'Women' category
-        const womenProducts = fetchedProducts.filter(product => product.category.includes('women'));
-
-        setProducts(womenProducts);
+        // Show all products (no filtering) - same as "Shop Women's Collection"
+        setProducts(fetchedProducts);
       } catch (error) {
         setError('Failed to load products');
       } finally {

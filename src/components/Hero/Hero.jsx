@@ -1,6 +1,4 @@
-﻿
-
-"use client"
+﻿"use client"
 
 import { useState , useEffect } from "react"
 import { Link } from "react-router-dom"
@@ -15,14 +13,61 @@ import diwali1 from "../Assets/diwali1.png";
 import diwali2 from "../Assets/diwali2.png";
 
 
-
-
 const Hero = () => {
   const [saleTexts, setSaleTexts] = useState([]);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [showSaleModal, setShowSaleModal] = useState(false);
   const [showSaleIndicator, setShowSaleIndicator] = useState(false);
+  const [showSaleModal, setShowSaleModal] = useState(false);
+  
+  // Carousel state
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  
+  // Carousel slides data
+  const carouselSlides = [
+    {
+      image: background_img,
+      title: "Elegance Redefined for Every Woman",
+      subtitle: "Women's Fashion Collection",
+      description: "From traditional Indian wear to contemporary Western styles, discover fashion that celebrates your individuality and empowers your confidence."
+    },
+    {
+      image: "/herosection6.jpg",
+      title: "Discover Your Perfect Style",
+      subtitle: "Exclusive Collection",
+      description: "Explore our curated selection of premium fabrics and timeless designs that speak to your unique fashion sense."
+    },
+    {
+      image: "/herosection1.jpg",
+      title: "Traditional Meets Modern",
+      subtitle: "Fusion Fashion",
+      description: "Where heritage craftsmanship meets contemporary design, creating pieces that are both classic and current."
+    },
+    {
+      image: "/herosection2.webp",
+      title: "Unleash Your Inner Beauty",
+      subtitle: "Premium Fashion",
+      description: "Transform your wardrobe with our stunning collection that combines elegance, comfort, and sophistication."
+    },
+    {
+      image: "/herosection3.jpg",
+      title: "Timeless Elegance",
+      subtitle: "Classic Collection",
+      description: "Embrace the beauty of timeless designs that never go out of style, perfect for every occasion."
+    },
+    {
+      image: "/herosection4.jpg",
+      title: "Modern Sophistication",
+      subtitle: "Contemporary Style",
+      description: "Step into the world of modern fashion with cutting-edge designs that define today's trends."
+    },
+    {
+      image: "/herosection5.jpg",
+      title: "Luxury Redefined",
+      subtitle: "Premium Collection",
+      description: "Experience the pinnacle of fashion excellence with our exclusive luxury designs crafted for the discerning fashion enthusiast."
+    }
+  ];
 
   const festivalThemes = {
     diwali: {
@@ -60,7 +105,7 @@ const Hero = () => {
     const fetchMahasales = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('https://api.silksew.com/api/offer/mahasales/active');
+        const response = await fetch('http://localhost:5003/api/offer/mahasales/active');
         const data = await response.json();
 
         if (data.success && data.mahasales && data.mahasales.length > 0) {
@@ -113,6 +158,30 @@ const Hero = () => {
     };
   }, [saleTexts.length]);
 
+  // Auto-rotate carousel
+  useEffect(() => {
+    const carouselInterval = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % carouselSlides.length);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => {
+      clearInterval(carouselInterval);
+    };
+  }, [carouselSlides.length]);
+
+  // Manual slide navigation
+  const goToSlide = (index) => {
+    setCurrentSlideIndex(index);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlideIndex((prev) => (prev + 1) % carouselSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlideIndex((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length);
+  };
+
   const triggerNavbarNavigation = (category) => {
     const event = new CustomEvent('navigateToCategory', { detail: { category } });
     window.dispatchEvent(event);
@@ -144,89 +213,63 @@ const Hero = () => {
   const currentTheme = getFestivalTheme(currentSale.festival);
 
   return (
-    <div className="main-container">
-      {/* Sale Indicator */}
-      {showSaleIndicator && !showSaleModal && saleTexts.length > 0 && (
-        <div
-          className="sale-indicator"
-          onClick={reopenModal}
-          style={{ backgroundColor: currentSale.color }}
-        >
-          <Tag size={18} />
-          <span>Sale Live!</span>
-          <div className="pulse-dot"></div>
-        </div>
-      )}
-
+    <>
       {/* Hero Section */}
-      <section className="hero-section">
-        <div
-          className="hero-background"
-          style={{
-            backgroundImage: `url(${background_img})`,
-          }}
-        >
-          <div className="hero-overlay" />
-        </div>
-
-        <div className="hero-content">
-          <div className="hero-text-content">
-            <div className="mb-6">
-              <span className="text-sm font-medium tracking-wider uppercase text-secondary">
-                Women's Fashion Collection
-              </span>
-            </div>
-
-            <h1
-              className="hero-title"
-              style={{ fontFamily: "var(--font-playfair)" }}
+      <div className="hero-section">
+        {/* Carousel Container */}
+        <div className="carousel-container">
+          {carouselSlides.map((slide, index) => (
+            <div
+              key={index}
+              className={`carousel-slide ${index === currentSlideIndex ? 'active' : ''}`}
+              style={{
+                backgroundImage: `url(${slide.image})`,
+                backgroundPosition: slide.image.includes('herosection1.jpg') || slide.image.includes('herosection4.jpg')
+                  ? 'center 35%' 
+                  : slide.image.includes('herosection3.jpg') || slide.image.includes('herosection4.jpg') || slide.image.includes('herosection5.jpg') ||slide.image.includes('herosection6.jpg') 
+                    ? 'center 55%' 
+                    : 'center 90%'
+              }}
             >
-              Elegance Redefined for Every Woman
-            </h1>
-
-            <p className="hero-description">
-              From traditional Indian wear to contemporary Western styles, discover fashion that celebrates your
-              individuality and empowers your confidence.
-            </p>
-
-            <div className="hero-buttons">
-              <button
-                onClick={() => triggerNavbarNavigation("All Products")}
-                className="hero-button primary"
-              >
-                Shop Women's Collection
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="button-icon"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-              <button
-                onClick={() => triggerNavbarNavigation("New Arrivals")}
-                className="hero-button secondary"
-              >
-                View New Arrivals
-              </button>
+              {/* Hero Content Overlay */}
+              <div className="hero-content">
+                <div className="hero-text-content">
+                  <h1 className="hero-title">{slide.title}</h1>
+                  <p className="hero-subtitle">{slide.subtitle}</p>
+                  <p className="hero-description">{slide.description}</p>
+                  {/* <div className="hero-buttons">
+                    <button 
+                      onClick={() => triggerNavbarNavigation("women")}
+                      className="hero-button primary"
+                    >
+                      Shop Women's Collection →
+                    </button>
+                    <button 
+                      onClick={() => triggerNavbarNavigation("New Arrivals")}
+                      className="hero-button secondary"
+                    >
+                      View New Arrivals
+                    </button>
+                  </div> */}
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
 
-        <div className="hero-scroll-indicator">
-          <div className="scroll-arrow">
-            <div className="scroll-dot" />
+        {/* Carousel Controls */}
+        <div className="carousel-controls">
+          <div className="carousel-dots">
+            {carouselSlides.map((_, index) => (
+              <button
+                key={index}
+                className={`dot ${index === currentSlideIndex ? 'active' : ''}`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Features Strip */}
       <div className="features-strip">
@@ -328,9 +371,8 @@ const Hero = () => {
           </div>
         </div>
       )}
-
       <NewCollections />
-    </div>
+    </>
   )
 }
 
