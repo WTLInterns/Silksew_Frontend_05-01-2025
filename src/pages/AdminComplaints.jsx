@@ -5,7 +5,7 @@ import { faSync } from "@fortawesome/free-solid-svg-icons"
 import "./CSS/AdminComplaints.css"
 
 // Define the base URL for your API
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5003"
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://api.silksew.com"
 
 const AdminComments = () => {
   const [issues, setIssues] = useState([])

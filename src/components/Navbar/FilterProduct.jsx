@@ -12,7 +12,7 @@ const FilterProduct = () => {
 useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5003/api/products");
+        const response = await axios.get("https://api.silksew.com/api/products");
   
         // Ensure API response is an array
         const fetchedProducts = Array.isArray(response.data.products)

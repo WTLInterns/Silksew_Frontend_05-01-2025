@@ -43,7 +43,7 @@
 //   useEffect(() => {
 //     const fetchOffer = async () => {
 //       try {
-//         const res = await axios.get("http://localhost:5003/api/offer/get-offer");
+//         const res = await axios.get("https://api.silksew.com/api/offer/get-offer");
 //         setOffer(res.data.formatOfferDates);
 //         console.log("Offer response:", res.data.offers);
 //       } catch (err) {
@@ -160,7 +160,7 @@ export default function SaleTimer() {
   useEffect(() => {
     const fetchOffer = async () => {
       try {
-        const res = await axios.get("http://localhost:5003/api/offer/get-offer");
+        const res = await axios.get("https://api.silksew.com/api/offer/get-offer");
         setOffer(res.data.formatOfferDates);
         console.log("Offer response:", res.data.offers);
       } catch (err) {

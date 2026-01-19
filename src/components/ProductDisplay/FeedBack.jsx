@@ -53,7 +53,7 @@ const FeedBack = ({ productId, onNewFeedback }) => {
         }
 
         try {
-          const res = await axios.post("http://localhost:5003/api/review/add", {
+          const res = await axios.post("https://api.silksew.com/api/review/add", {
             productId,
             userId,
             rating,

@@ -5,7 +5,7 @@
 // import axios from "axios"
 // import { LeftOutlined, RightOutlined } from "@ant-design/icons"
 
-// const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5003"
+// const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || "https://api.silksew.com"
 // const ITEMS_PER_PAGE = 9
 
 // const ReturnOrderList = () => {
@@ -255,7 +255,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { LeftOutlined, RightOutlined } from "@ant-design/icons"
 
-const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5003"
+const BASEURL = process.env.NEXT_PUBLIC_BASE_URL || "https://api.silksew.com"
 const ITEMS_PER_PAGE = 9
 
 const ReturnOrderList = () => {

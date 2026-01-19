@@ -49,7 +49,7 @@
 //       }
 
 //       const response = await axios.get(
-//         "http://localhost:5003/api/userProfileDetail/user-profile",
+//         "https://api.silksew.com/api/userProfileDetail/user-profile",
 //         {
 //           headers: {
 //             'Authorization': `Bearer ${authToken}`,
@@ -97,7 +97,7 @@
       
 //       setLoadingProducts(true);
       
-//       const response = await axios.get("http://localhost:5003/api/orders/myorders", {
+//       const response = await axios.get("https://api.silksew.com/api/orders/myorders", {
 //         headers: {
 //           'Authorization': `Bearer ${authToken}`,
 //           'Content-Type': 'application/json',
@@ -188,7 +188,7 @@
 //     try {
 //       setLoading(true);
 //       const response = await axios.put(
-//         "http://localhost:5003/api/updateUserProfileDetail/update-user-profile",
+//         "https://api.silksew.com/api/updateUserProfileDetail/update-user-profile",
 //         userData,
 //         {
 //           headers: {
@@ -1320,7 +1320,7 @@ const UserProfileButtons = () => {
         return
       }
 
-      const response = await axios.get("http://localhost:5003/api/userProfileDetail/user-profile", {
+      const response = await axios.get("https://api.silksew.com/api/userProfileDetail/user-profile", {
         headers: {
           Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
@@ -1365,7 +1365,7 @@ const UserProfileButtons = () => {
 
       setLoadingProducts(true)
 
-      const response = await axios.get("http://localhost:5003/api/orders/myorders", {
+      const response = await axios.get("https://api.silksew.com/api/orders/myorders", {
         headers: {
           Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
@@ -1453,7 +1453,7 @@ const UserProfileButtons = () => {
     try {
       setLoading(true)
       const response = await axios.put(
-        "http://localhost:5003/api/updateUserProfileDetail/update-user-profile",
+        "https://api.silksew.com/api/updateUserProfileDetail/update-user-profile",
         userData,
         {
           headers: {

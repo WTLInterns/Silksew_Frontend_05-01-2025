@@ -15,7 +15,7 @@ function UpdateRemoveOffer() {
   const fetchOffers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5003/api/offer/get-offer"
+        "https://api.silksew.com/api/offer/get-offer"
       );
       const fetchedOffer = response.data.offers;
       console.log("get offer", fetchedOffer);
@@ -45,7 +45,7 @@ function UpdateRemoveOffer() {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5003/api/offer/update-offer/${editingOffer._id}`,
+        `https://api.silksew.com/api/offer/update-offer/${editingOffer._id}`,
         editingOffer
       );
       toast.success("Offer updated successfully");
@@ -60,7 +60,7 @@ function UpdateRemoveOffer() {
   const handleDelete = async (id) => {
     try {
       await axios.delete(
-        `http://localhost:5003/api/offer/delete-offer/${id}`
+        `https://api.silksew.com/api/offer/delete-offer/${id}`
       );
       toast.success("Offer deleted successfully");
       fetchOffers();

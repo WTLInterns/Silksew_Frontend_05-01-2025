@@ -39,7 +39,7 @@ const Navbar = () => {
       try {
         setCategoriesLoading(true);
         console.log('Fetching categories and subcategories...');
-        const response = await fetch('http://localhost:5003/api/products/categories-subcategories');
+        const response = await fetch('https://api.silksew.com/api/products/categories-subcategories');
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -298,7 +298,7 @@ const Navbar = () => {
       
       // Build API URL with all subcategories using the new efficient endpoint
       const subcategoriesParam = subcategories.map(sub => encodeURIComponent(sub)).join(',');
-      const url = `http://localhost:5003/api/products/by-multiple-subcategories?subcategories=${subcategoriesParam}&category=${encodeURIComponent(category)}`;
+      const url = `https://api.silksew.com/api/products/by-multiple-subcategories?subcategories=${subcategoriesParam}&category=${encodeURIComponent(category)}`;
       
       const response = await fetch(url);
       
@@ -382,7 +382,7 @@ const Navbar = () => {
     try {
       if (subcategory === "All Products" || subcategory === "New Arrivals") {
         // Handle special cases: All Products or New Arrivals
-        const response = await fetch("http://localhost:5003/api/products");
+        const response = await fetch("https://api.silksew.com/api/products");
         if (response.ok) {
           const data = await response.json();
           if (data.success) {
@@ -397,7 +397,7 @@ const Navbar = () => {
         }
       } else {
         // Handle regular subcategory with optional category filter
-        let url = `http://localhost:5003/api/products/by-subcategory?subcategory=${encodeURIComponent(subcategory)}`;
+        let url = `https://api.silksew.com/api/products/by-subcategory?subcategory=${encodeURIComponent(subcategory)}`;
         if (category) {
           url += `&category=${encodeURIComponent(category)}`;
         }

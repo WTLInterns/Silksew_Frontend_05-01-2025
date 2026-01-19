@@ -183,7 +183,7 @@ const NewCollections = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5003/api/products/list")
+        const response = await axios.get("https://api.silksew.com/api/products/list")
         const fetchedProducts = Array.isArray(response?.data) 
           ? response.data 
           : (response?.data?.products || [])

@@ -252,7 +252,7 @@ const CategoriesPage = () => {
         setLoading(true)
         
         // Fetch categories from backend - using same endpoint as navbar
-        const categoriesResponse = await axios.get('http://localhost:5003/api/products/categories-subcategories')
+        const categoriesResponse = await axios.get('https://api.silksew.com/api/products/categories-subcategories')
         console.log('Categories response:', categoriesResponse.data)
         
         if (categoriesResponse.data.success && categoriesResponse.data.categories) {
@@ -305,7 +305,7 @@ const CategoriesPage = () => {
                   try {
                     // Use exact same API call as navbar
                     const subcategoriesParam = subcategories.map(sub => encodeURIComponent(sub)).join(',')
-                    const url = `http://localhost:5003/api/products/by-multiple-subcategories?subcategories=${subcategoriesParam}&category=${encodeURIComponent(categoryName)}`
+                    const url = `https://api.silksew.com/api/products/by-multiple-subcategories?subcategories=${subcategoriesParam}&category=${encodeURIComponent(categoryName)}`
                     console.log(`Fetching products from: ${url}`)
                     
                     const response = await fetch(url)
@@ -318,7 +318,7 @@ const CategoriesPage = () => {
                       } else {
                         console.error("API returned error:", data.message)
                         // Fallback to client-side filtering (same as navbar)
-                        const allProductsResponse = await axios.get('http://localhost:5003/api/products')
+                        const allProductsResponse = await axios.get('https://api.silksew.com/api/products')
                         if (allProductsResponse.data.success && allProductsResponse.data.products) {
                           products = allProductsResponse.data.products.filter(product =>
                             product.category === categoryName ||
@@ -330,7 +330,7 @@ const CategoriesPage = () => {
                     } else {
                       console.error("Failed to fetch products from API")
                       // Fallback to client-side filtering (same as navbar)
-                      const allProductsResponse = await axios.get('http://localhost:5003/api/products')
+                      const allProductsResponse = await axios.get('https://api.silksew.com/api/products')
                       if (allProductsResponse.data.success && allProductsResponse.data.products) {
                         products = allProductsResponse.data.products.filter(product =>
                           product.category === categoryName ||
@@ -343,7 +343,7 @@ const CategoriesPage = () => {
                     console.error("Error fetching category products:", apiErr)
                     // Fallback to client-side filtering (same as navbar)
                     try {
-                      const allProductsResponse = await axios.get('http://localhost:5003/api/products')
+                      const allProductsResponse = await axios.get('https://api.silksew.com/api/products')
                       if (allProductsResponse.data.success && allProductsResponse.data.products) {
                         products = allProductsResponse.data.products.filter(product =>
                           product.category === categoryName ||
