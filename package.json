@@ -78,12 +78,17 @@
     "postcss": "^8.4.31",
     "svgo": "^2.8.0",
     "css-select": "^4.3.0",
-    "webpack-dev-server": "^4.15.1",
+    "jsonpath": "^1.1.1",
+    "webpack-dev-server": "^5.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": {
-      "webpack-dev-server": "^4.15.1"
+      "webpack-dev-server": "^5.1.0"
     },
     "react-scripts": {
-      "webpack-dev-server": "^4.15.1"
+      "webpack-dev-server": "^5.1.0"
     }
+  },
+  "resolutions": {
+    "webpack-dev-server": "^5.1.0",
+    "jsonpath": "^1.1.1"
   }
 }

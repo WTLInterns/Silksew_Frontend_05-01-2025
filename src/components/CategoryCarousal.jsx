@@ -147,6 +147,16 @@ const CategoryBanner = ({ category, onCategoryClick }) => {
   )
 }
 
+// Function to create safe CSS selectors from category names
+const createSafeSelector = (categoryName) => {
+  return categoryName
+    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove ALL special characters including ampersands
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+    .toLowerCase() || 'category'; // Fallback to 'category' if result is empty
+}
+
 // Products Carousel Component
 const ProductsCarousel = ({ products, categoryName }) => {
   const breakpoints = {
@@ -168,6 +178,9 @@ const ProductsCarousel = ({ products, categoryName }) => {
     },
   }
 
+  // Create safe selector for this category
+  const safeSelector = createSafeSelector(categoryName);
+
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-8">
@@ -183,12 +196,12 @@ const ProductsCarousel = ({ products, categoryName }) => {
         spaceBetween={20}
         slidesPerView={1}
         navigation={{
-          nextEl: `.swiper-next-${categoryName.replace(/\s+/g, '-')}`,
-          prevEl: `.swiper-prev-${categoryName.replace(/\s+/g, '-')}`,
+          nextEl: `.swiper-next-${safeSelector}`,
+          prevEl: `.swiper-prev-${safeSelector}`,
         }}
         pagination={{
           clickable: true,
-          el: `.swiper-pagination-${categoryName.replace(/\s+/g, '-')}`,
+          el: `.swiper-pagination-${safeSelector}`,
           bulletClass: 'swiper-pagination-bullet',
           bulletActiveClass: 'swiper-pagination-bullet-active',
         }}
@@ -207,20 +220,20 @@ const ProductsCarousel = ({ products, categoryName }) => {
       
       {/* Custom Navigation Buttons */}
       <button 
-        className={`swiper-prev-${categoryName.replace(/\s+/g, '-')} absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-200 flex items-center justify-center border border-gray-200`}
+        className={`swiper-prev-${safeSelector} absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-200 flex items-center justify-center border border-gray-200`}
         aria-label="Previous slide"
       >
         <ChevronLeft size={20} className="text-gray-700" />
       </button>
       <button 
-        className={`swiper-next-${categoryName.replace(/\s+/g, '-')} absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-200 flex items-center justify-center border border-gray-200`}
+        className={`swiper-next-${safeSelector} absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all duration-200 flex items-center justify-center border border-gray-200`}
         aria-label="Next slide"
       >
         <ChevronRight size={20} className="text-gray-700" />
       </button>
       
       {/* Custom Pagination */}
-      <div className={`swiper-pagination-${categoryName.replace(/\s+/g, '-')} !relative !mt-6 !flex !justify-center !gap-2`}></div>
+      <div className={`swiper-pagination-${safeSelector} !relative !mt-6 !flex !justify-center !gap-2`}></div>
       
       {/* Custom styles for pagination dots */}
       <style jsx>{`
