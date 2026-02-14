@@ -21,6 +21,9 @@ const Navbar = () => {
   const [showOnlyProducts, setShowOnlyProducts] = useState(false)
   const [nowTick, setNowTick] = useState(Date.now())
   const mobileNavRef = useRef(null)
+  const desktopNavScrollRef = useRef(null)
+  const [showDesktopNavScrollRight, setShowDesktopNavScrollRight] = useState(false)
+  const [desktopDropdownPosition, setDesktopDropdownPosition] = useState({ left: 0, top: 0 })
   const { favorites } = useFavorites()
   const navigate = useNavigate()
   const location = useLocation()
@@ -137,6 +140,26 @@ const Navbar = () => {
     if (showMobileMenu) setShowMobileMenu(false)
     if (showMobileSearch) setShowMobileSearch(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    const el = desktopNavScrollRef.current
+    if (!el) return
+
+    const updateScrollButtonVisibility = () => {
+      const canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+      setShowDesktopNavScrollRight(canScrollRight)
+    }
+
+    updateScrollButtonVisibility()
+
+    el.addEventListener('scroll', updateScrollButtonVisibility, { passive: true })
+    window.addEventListener('resize', updateScrollButtonVisibility)
+
+    return () => {
+      el.removeEventListener('scroll', updateScrollButtonVisibility)
+      window.removeEventListener('resize', updateScrollButtonVisibility)
+    }
+  }, [categoriesLoading, navigationMenu])
 
   // Listen for custom events from Hero component
   useEffect(() => {
@@ -264,8 +287,15 @@ const Navbar = () => {
     setSearchResults([])
   }
 
-  const handleDropdownHover = (category) => {
+  const handleDropdownHover = (category, event) => {
     setActiveDropdown(category);
+    if (event?.currentTarget) {
+      const rect = event.currentTarget.getBoundingClientRect()
+      const dropdownWidth = 220
+      const maxLeft = Math.max(0, window.innerWidth - dropdownWidth - 8)
+      const left = Math.min(rect.left, maxLeft)
+      setDesktopDropdownPosition({ left, top: rect.bottom })
+    }
   };
 
   const handleDropdownLeave = () => {
@@ -623,99 +653,117 @@ const Navbar = () => {
 
 
           {/* Navigation Menu - Desktop */}
-          <nav className="desktop-nav" style={{ display: "flex", alignItems: "center", flex: 1, minHeight: '70px' }}>
-            {categoriesLoading ? (
-              <div style={{ padding: '0 16px', color: '#6b7280' }}>Loading categories...</div>
-            ) : navigationMenu._error ? (
-              <div style={{ padding: '0 16px', color: '#ef4444' }}>{navigationMenu._error}</div>
-            ) : Object.keys(navigationMenu).length === 0 ? (
-              <div style={{ padding: '0 16px', color: '#ef4444' }}>No categories found</div>
-            ) : (
-              Object.entries(navigationMenu).map(([category, subcategories]) => (
-                <div
-                  key={category}
-                  style={{ position: "relative" }}
-                  onMouseEnter={() => handleDropdownHover(category)}
-                  onMouseLeave={handleDropdownLeave}
-                >
-                  <Link
-                    to="#"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      padding: "0 16px",
-                      height: "70px",
-                      textDecoration: "none",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      color: "#374151",
-                      whiteSpace: "nowrap",
-                      transition: "color 0.2s ease"
-                    }}
-                    onMouseOver={(e) => {
-                      e.target.style.color = "#d97706"
-                    }}
-                    onMouseOut={(e) => {
-                      e.target.style.color = "#374151"
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleCategoryClick(category);
-                    }}
-                  >
-                    <span>{category}</span>
-                    {subcategories.length > 0 && (
-                      <ChevronDown size={14} />
-                    )}
-                  </Link>
+          <nav className="desktop-nav" style={{ display: "flex", alignItems: "center", flex: 1, minHeight: '70px', minWidth: 0 }}>
+            <div className="desktop-nav-scroll-wrapper">
+              <div className="desktop-nav-scroll" ref={desktopNavScrollRef}>
+                {categoriesLoading ? (
+                  <div style={{ padding: '0 16px', color: '#6b7280' }}>Loading categories...</div>
+                ) : navigationMenu._error ? (
+                  <div style={{ padding: '0 16px', color: '#ef4444' }}>{navigationMenu._error}</div>
+                ) : Object.keys(navigationMenu).length === 0 ? (
+                  <div style={{ padding: '0 16px', color: '#ef4444' }}>No categories found</div>
+                ) : (
+                  Object.entries(navigationMenu).map(([category, subcategories]) => (
+                    <div
+                      key={category}
+                      style={{ position: "relative" }}
+                      onMouseEnter={(e) => handleDropdownHover(category, e)}
+                      onMouseLeave={handleDropdownLeave}
+                    >
+                      <Link
+                        to="#"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          padding: "0 16px",
+                          height: "70px",
+                          textDecoration: "none",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          color: "#374151",
+                          whiteSpace: "nowrap",
+                          transition: "color 0.2s ease"
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.color = "#d97706"
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.color = "#374151"
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCategoryClick(category);
+                        }}
+                      >
+                        <span>{category}</span>
+                        {subcategories.length > 0 && (
+                          <ChevronDown size={14} />
+                        )}
+                      </Link>
 
-                  {/* Dropdown Menu */}
-                  {activeDropdown === category && subcategories.length > 0 && (
-                    <div style={{
-                      position: "absolute",
-                      top: "100%",
-                      left: "0",
-                      backgroundColor: "#fff",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "8px",
-                      boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-                      zIndex: 50,
-                      minWidth: "200px",
-                      maxHeight: "500px",
-                      overflowY: "auto",
-                      padding: "8px 0"
-                    }}>
-                      {subcategories.map((subcategory) => (
-                        <div
-                          key={subcategory}
-                          style={{
-                            display: "block",
-                            padding: "12px 20px",
-                            fontSize: "14px",
-                            color: "#374151",
-                            textDecoration: "none",
-                            transition: "all 0.2s ease",
-                            cursor: "pointer"
-                          }}
-                          onClick={() => handleSubcategoryClick(category, subcategory)}
-                          onMouseOver={(e) => {
-                            e.target.style.backgroundColor = "#f3f4f6"
-                            e.target.style.color = "#d97706"
-                          }}
-                          onMouseOut={(e) => {
-                            e.target.style.backgroundColor = "transparent"
-                            e.target.style.color = "#374151"
-                          }}
-                        >
-                          {subcategory}
+                      {activeDropdown === category && subcategories.length > 0 && (
+                        <div style={{
+                          position: "fixed",
+                          top: `${desktopDropdownPosition.top}px`,
+                          left: `${desktopDropdownPosition.left}px`,
+                          backgroundColor: "#fff",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                          zIndex: 2000,
+                          minWidth: "200px",
+                          maxHeight: "500px",
+                          overflowY: "auto",
+                          padding: "8px 0"
+                        }}>
+                          {subcategories.map((subcategory) => (
+                            <div
+                              key={subcategory}
+                              style={{
+                                display: "block",
+                                padding: "12px 20px",
+                                fontSize: "14px",
+                                color: "#374151",
+                                textDecoration: "none",
+                                transition: "all 0.2s ease",
+                                cursor: "pointer"
+                              }}
+                              onClick={() => handleSubcategoryClick(category, subcategory)}
+                              onMouseOver={(e) => {
+                                e.target.style.backgroundColor = "#f3f4f6"
+                                e.target.style.color = "#d97706"
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.backgroundColor = "transparent"
+                                e.target.style.color = "#374151"
+                              }}
+                            >
+                              {subcategory}
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  )}
-                </div>
-              ))
-            )}
+                  ))
+                )}
+              </div>
+
+              {showDesktopNavScrollRight && (
+                <button
+                  type="button"
+                  className="desktop-nav-scroll-button"
+                  aria-label="Scroll categories right"
+                  onClick={() => {
+                    const el = desktopNavScrollRef.current
+                    if (!el) return
+                    el.scrollBy({ left: 240, behavior: 'smooth' })
+                  }}
+                >
+                  <ChevronDown size={18} style={{ transform: 'rotate(-90deg)' }} />
+                </button>
+              )}
+            </div>
           </nav>
 
           {/* Search Bar and Icons + Hamburger */}

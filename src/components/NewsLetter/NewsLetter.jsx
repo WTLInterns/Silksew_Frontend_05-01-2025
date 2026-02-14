@@ -205,7 +205,7 @@ export function Newsletter() {
         width: "100vw",
         marginLeft: "calc(-50vw + 50%)",
         marginRight: "calc(-50vw + 50%)",
-        marginTop: "80px",
+        marginTop: isMobile ? "70px" : "90px", // Responsive margin based on navbar height
         textAlign: "center",
         backgroundImage: "url('/banner.jpg')",
         backgroundSize: "cover",
@@ -213,10 +213,11 @@ export function Newsletter() {
         backgroundRepeat: "no-repeat",
         backdropFilter: "blur(2px)",
         WebkitBackdropFilter: "blur(2px)",
-        padding: "60px 40px",
+        padding: isMobile ? "40px 20px" : "60px 40px", // Responsive padding
         boxShadow: "0 8px 32px rgba(139, 69, 19, 0.4)",
         position: "relative",
-        overflow: "hidden"
+        overflow: "hidden",
+        minHeight: isMobile ? "auto" : "400px" // Responsive height
       }}>
         {/* Enhanced glass overlay effect */}
         <div style={{
@@ -238,7 +239,7 @@ export function Newsletter() {
           margin: "0 auto"
         }}>
           <h2 style={{
-            fontSize: "32px",
+            fontSize: isMobile ? "24px" : "32px", // Responsive font size
             fontWeight: "300",
             marginBottom: "16px",
             fontFamily: "serif",
@@ -252,15 +253,16 @@ export function Newsletter() {
           </h2>
           
           <p style={{
-            fontSize: "16px",
+            fontSize: isMobile ? "14px" : "16px", // Responsive font size
             color: "rgba(255, 255, 255, 0.95)",
-            marginBottom: "48px",
-            maxWidth: "600px",
-            margin: "0 auto 48px auto",
+            marginBottom: isMobile ? "32px" : "48px", // Responsive margin
+            maxWidth: isMobile ? "100%" : "600px", // Responsive max width
+            margin: "0 auto " + (isMobile ? "32px" : "48px") + " auto",
             lineHeight: "1.6",
             textShadow: "0 1px 5px rgba(0, 0, 0, 0.2)",
             position: "relative",
-            zIndex: 2
+            zIndex: 2,
+            padding: isMobile ? "0 10px" : "0" // Responsive padding
           }}>
             Discover exceptional quality and service that sets us apart in the world of fashion
           </p>
@@ -269,19 +271,21 @@ export function Newsletter() {
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
-            gap: "48px",
-            maxWidth: "1000px",
+            gap: isMobile ? "24px" : "48px", // Responsive gap
+            maxWidth: isMobile ? "100%" : "1000px", // Responsive max width
             margin: "0 auto",
             flexWrap: "wrap",
             position: "relative",
-            zIndex: 2
+            zIndex: 2,
+            padding: isMobile ? "0 10px" : "0" // Responsive padding
           }}>
             <div style={{
               textAlign: "center",
-              flex: "1"
+              flex: isMobile ? "none" : "1", // Don't use flex on mobile
+              width: isMobile ? "100%" : "auto" // Full width on mobile
             }}>
               <h3 style={{
-                fontSize: "20px",
+                fontSize: isMobile ? "18px" : "20px", // Responsive font size
                 fontWeight: "600",
                 color: "#ffffff",
                 margin: "0 0 8px 0",
@@ -291,7 +295,7 @@ export function Newsletter() {
                 Premium Quality 
               </h3>
               <p style={{
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px", // Responsive font size
                 color: "rgba(255, 255, 255, 0.85)",
                 margin: "0",
                 lineHeight: "1.6",
@@ -302,10 +306,11 @@ export function Newsletter() {
             </div>
             <div style={{
               textAlign: "center",
-              flex: "1"
+              flex: isMobile ? "none" : "1", // Don't use flex on mobile
+              width: isMobile ? "100%" : "auto" // Full width on mobile
             }}>
               <h3 style={{
-                fontSize: "20px",
+                fontSize: isMobile ? "18px" : "20px", // Responsive font size
                 fontWeight: "600",
                 color: "#ffffff",
                 margin: "0 0 8px 0",
@@ -315,7 +320,7 @@ export function Newsletter() {
                 Expert Craftsmanship
               </h3>
               <p style={{
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px", // Responsive font size
                 color: "rgba(255, 255, 255, 0.85)",
                 margin: "0",
                 lineHeight: "1.6",
@@ -326,10 +331,11 @@ export function Newsletter() {
             </div>
             <div style={{
               textAlign: "center",
-              flex: "1"
+              flex: isMobile ? "none" : "1", // Don't use flex on mobile
+              width: isMobile ? "100%" : "auto" // Full width on mobile
             }}>
               <h3 style={{
-                fontSize: "20px",
+                fontSize: isMobile ? "18px" : "20px", // Responsive font size
                 fontWeight: "600",
                 color: "#ffffff",
                 margin: "0 0 8px 0",
@@ -339,7 +345,7 @@ export function Newsletter() {
                 Fast & Free Shipping
               </h3>
               <p style={{
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px", // Responsive font size
                 color: "rgba(255, 255, 255, 0.85)",
                 margin: "0",
                 lineHeight: "1.6",
@@ -350,10 +356,11 @@ export function Newsletter() {
             </div>
             <div style={{
               textAlign: "center",
-              flex: "1"
+              flex: isMobile ? "none" : "1", // Don't use flex on mobile
+              width: isMobile ? "100%" : "auto" // Full width on mobile
             }}>
               <h3 style={{
-                fontSize: "20px",
+                fontSize: isMobile ? "18px" : "20px", // Responsive font size
                 fontWeight: "600",
                 color: "#ffffff",
                 margin: "0 0 8px 0",
@@ -363,7 +370,7 @@ export function Newsletter() {
                 Exclusive Designs
               </h3>
               <p style={{
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px", // Responsive font size
                 color: "rgba(255, 255, 255, 0.85)",
                 margin: "0",
                 lineHeight: "1.6",
@@ -376,33 +383,55 @@ export function Newsletter() {
       </div>
     </div>
 
-    <div style={containerStyles}>
+    <div style={{
+      ...containerStyles,
+      paddingTop: isMobile ? "40px" : "80px", // Responsive padding
+      paddingBottom: isMobile ? "40px" : "80px" // Responsive padding
+    }}>
       <Card>
         <CardContent>
           <div style={{
             display: "flex",
             alignItems: isMobile ? "flex-start" : "center",
             flexDirection: isMobile ? "column" : "row",
-            gap: isMobile ? "24px" : "32px",
+            gap: isMobile ? "24px" : "32px", // Responsive gap
             marginBottom: "32px",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            padding: isMobile ? "0 10px" : "0" // Responsive padding
           }}>
             <img 
               src="/images/shopping.png" 
               alt="Shopping"
               style={{
-                width: isMobile ? "200px" : "350px",
-                height: isMobile ? "200px" : "400px",
-                objectFit: "contain"
+                width: isMobile ? "150px" : "350px", // Responsive width
+                height: isMobile ? "150px" : "400px", // Responsive height
+                objectFit: "contain",
+                margin: isMobile ? "0 auto" : "0" // Center on mobile
               }}
             />
-            <div style={{ flex: "1" }}>
-              <h2 style={responsiveTitleStyles}>Stay in Style</h2>
-              <p style={subtitleStyles}>
+              <div style={{ 
+                flex: "1",
+                textAlign: isMobile ? "center" : "left" // Center text on mobile
+              }}>
+              <h2 style={{
+                ...responsiveTitleStyles,
+                textAlign: isMobile ? "center" : "left", // Center on mobile
+                marginBottom: isMobile ? "16px" : "16px"
+              }}>Stay in Style</h2>
+              <p style={{
+                ...subtitleStyles,
+                textAlign: isMobile ? "center" : "left", // Center on mobile
+                maxWidth: isMobile ? "100%" : "512px", // Full width on mobile
+                margin: isMobile ? "0 auto 24px auto" : "0 auto 32px auto" // Responsive margin
+              }}>
                 Be the first to know about new collections, exclusive offers, and style inspiration. Join our community of
                 fashion enthusiasts.
               </p>
-              <div style={responsiveFormStyles}>
+              <div style={{
+                ...responsiveFormStyles,
+                maxWidth: isMobile ? "100%" : "384px", // Full width on mobile
+                margin: isMobile ? "0 auto" : "0" // Center on mobile
+              }}>
                 <Input
                   type="email"
                   placeholder="Enter your email address"
@@ -425,7 +454,11 @@ export function Newsletter() {
                   Subscribe
                 </Button>
               </div>
-              <p style={disclaimerStyles}>By subscribing, you agree to our Privacy Policy and Terms of Service.</p>
+              <p style={{
+                ...disclaimerStyles,
+                textAlign: isMobile ? "center" : "left", // Center on mobile
+                fontSize: isMobile ? "12px" : "14px" // Smaller font on mobile
+              }}>By subscribing, you agree to our Privacy Policy and Terms of Service.</p>
             </div>
           </div>
         </CardContent>

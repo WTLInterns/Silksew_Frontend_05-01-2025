@@ -92,6 +92,58 @@
   display: block;
 }
 
+ .desktop-nav-scroll-wrapper {
+   position: relative;
+   display: flex;
+   align-items: center;
+   width: 100%;
+   min-width: 0;
+ }
+
+ .desktop-nav-scroll {
+   display: flex;
+   align-items: center;
+   gap: 0;
+   width: 100%;
+   min-width: 0;
+   overflow-x: auto;
+   overflow-y: visible;
+   scroll-behavior: smooth;
+   -webkit-overflow-scrolling: touch;
+   padding-right: 44px;
+ }
+
+ .desktop-nav-scroll {
+   -ms-overflow-style: none;
+   scrollbar-width: none;
+ }
+
+ .desktop-nav-scroll::-webkit-scrollbar {
+   display: none;
+ }
+
+ .desktop-nav-scroll-button {
+   position: absolute;
+   right: 0;
+   top: 50%;
+   transform: translateY(-50%);
+   height: 36px;
+   width: 36px;
+   border-radius: 9999px;
+   border: 1px solid #e5e7eb;
+   background: #ffffff;
+   color: #374151;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+ }
+
+ .desktop-nav-scroll-button:hover {
+   background: #f9fafb;
+ }
+
 .nav-right {
   display: flex;
   align-items: center;
@@ -226,7 +278,8 @@
 
 @media (max-width: 1024px) {
   .navbar {
-    padding: 15px 20px;
+    padding: 10px 15px; /* Reduced padding to minimize extra space */
+    height: 60px; /* Ensure consistent height */
   }
 
   .desktop-nav {
@@ -337,7 +390,8 @@
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 12px 15px;
+    padding: 8px 12px; /* Further reduced padding for mobile */
+    height: 55px; /* Slightly smaller height on mobile */
   }
   
   .mobile-profile-icon{
@@ -467,7 +521,8 @@
 
 @media (max-width: 480px) {
   .navbar {
-    padding: 10px;
+    padding: 6px 10px; /* Minimal padding for small mobile */
+    height: 50px; /* Smaller height for small mobile */
   }
 
   .nav-logo img {
